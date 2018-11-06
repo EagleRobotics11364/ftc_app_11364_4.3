@@ -2,14 +2,20 @@ package org.firstinspires.ftc.teamcode.library.systems;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-public abstract class Drivetrain {
+public abstract class Drivetrain implements Stoppable {
     DcMotor frontLeftMotor;
     DcMotor frontRightMotor;
     DcMotor backLeftMotor;
     DcMotor backRightMotor;
 
-    public abstract void run(double x, double z);
+    public abstract void run(double y, double z);
 
+    public void stop() {
+        frontLeftMotor.setPower(0);
+        frontRightMotor.setPower(0);
+        backLeftMotor.setPower(0);
+        backRightMotor.setPower(0);
+    }
 
 
 }

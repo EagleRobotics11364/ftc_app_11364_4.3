@@ -51,7 +51,7 @@ public class LeagueMeet3Teleop extends OpMode {
         Color Sensor Telemetry
          */
         telemetry.addData("Left red", robot.leftColorSensor.red());
-        telemetry.addData("Right red", robot.leftColorSensor.red());
+        telemetry.addData("Right red", robot.rightColorSensor.red());
         telemetry.update();
 
     }

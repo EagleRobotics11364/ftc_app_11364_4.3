@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.library.systems;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -22,9 +23,11 @@ public class LeagueMeet3Robot {
     // Servo Variables
     public Servo teamMarkerServo;
 
-    // Color Sensor Variables
+    // Color/Distance Sensor Variables
     public ColorSensor leftColorSensor;
     public ColorSensor rightColorSensor;
+    public DistanceSensor leftDistanceSensor;
+    public DistanceSensor rightDistanceSensor;
 
     // Robot Systems Variables
     public Holonomic holonomic;
@@ -43,6 +46,9 @@ public class LeagueMeet3Robot {
 
         leftColorSensor = hardwareMap.colorSensor.get("leftColorSensor");
         rightColorSensor = hardwareMap.colorSensor.get("rightColorSensor");
+
+        leftDistanceSensor = hardwareMap.get(DistanceSensor.class, "leftColorSensor");
+        rightDistanceSensor = hardwareMap.get(DistanceSensor.class, "rightColorSensor");
 
         holonomic = new Holonomic(frontLeftMotor, backLeftMotor,frontRightMotor,backRightMotor);
         dualTapeSpools = new DualTapeSpools(frontTapeMeasure, backTapeMeasure);
