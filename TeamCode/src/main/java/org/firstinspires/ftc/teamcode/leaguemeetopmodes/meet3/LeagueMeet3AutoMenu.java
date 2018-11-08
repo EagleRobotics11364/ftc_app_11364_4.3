@@ -11,20 +11,19 @@ import org.firstinspires.ftc.teamcode.library.sampling.FieldSample;
 import org.firstinspires.ftc.teamcode.library.sampling.VuforiaTFODSampler;
 import org.firstinspires.ftc.teamcode.library.systems.LeagueMeet3Robot;
 
-import java.util.Iterator;
-
 
 @Autonomous(name = "League Meet 3 Auto", group = "Meet3")
-public class LeagueMeet3Auto extends LinearOpMode {
+public class LeagueMeet3AutoMenu extends LinearOpMode {
 
     // robot, core systems variables
     private LeagueMeet3Robot robot;
     private VuforiaTFODSampler vuforiaTFODSampler;
 
     // action variables
-
     private Position startingPosition = Position.NULL;
-    private boolean useVuforiaTFOD = true;
+    private boolean useVuforiaTFOD = false;
+    private boolean parkInCrater = false;
+    private boolean dropTeamMarker = false;
     private int secondsDelay = 0;
 
     // learned variables
@@ -35,26 +34,28 @@ public class LeagueMeet3Auto extends LinearOpMode {
         // init robot
         robot = new LeagueMeet3Robot(hardwareMap);
         robot.teamMarkerServo.setPosition(0);
-        while (!isStarted()) {
-            // get presets for program
-            if (gamepad1.dpad_left) startingPosition = Position.LEFT;
-            if (gamepad1.dpad_right) startingPosition = Position.RIGHT;
-            if (gamepad1.a) useVuforiaTFOD = true;
-            if (gamepad1.b) useVuforiaTFOD = false;
-
-            if (gamepad1.dpad_up && secondsDelay < 15) {
-                secondsDelay++;
-                while(gamepad1.dpad_up);
-            } else if (gamepad1.dpad_down  && secondsDelay >  0) {
-                secondsDelay--;
-                while(gamepad1.dpad_down);
+        IterableMenu iterableMenu = new IterableMenu(telemetry);
+        while (!isStarted() & opModeIsActive()) {
+            if (gamepad1.dpad_up) {
+                iterableMenu.previousItem();
+                while (gamepad1.dpad_up & opModeIsActive()) ;
+            } else if (gamepad1.dpad_down) {
+                iterableMenu.nextItem();
+                while (gamepad1.dpad_down & opModeIsActive()) ;
+            } else if (gamepad1.dpad_left) {
+                iterableMenu.iterateValueBackwards();
+                while (gamepad1.dpad_left & opModeIsActive()) ;
+            } else if (gamepad1.dpad_right) {
+                iterableMenu.iterateValueForward();
+                while (gamepad1.dpad_right & opModeIsActive()) ;
             }
-
-            telemetry.addData("Starting Position", startingPosition);
-            telemetry.addData("Use Vuforia/TFOD", useVuforiaTFOD);
-            telemetry.addData("Sleep", secondsDelay);
-            telemetry.update();
         }
+
+        startingPosition = iterableMenu.position.getValue();
+        useVuforiaTFOD = iterableMenu.useVuforia.getValue();
+        secondsDelay = iterableMenu.startDelay.getValue();
+        parkInCrater = iterableMenu.parkInCrater.getValue();
+        dropTeamMarker = iterableMenu.dropTeamMarker.getValue();
 
         if (useVuforiaTFOD) {
             try {

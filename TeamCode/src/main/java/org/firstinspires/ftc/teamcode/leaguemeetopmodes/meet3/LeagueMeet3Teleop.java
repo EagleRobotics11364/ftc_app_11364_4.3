@@ -25,7 +25,7 @@ public class LeagueMeet3Teleop extends OpMode {
         else if (gamepad1.dpad_down) slow = true;
 
 
-        double directions[] = {gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x};
+        double directions[] = {gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x};
 
         for (int i = 0; i < directions.length; i++) {
             directions[i] = rangeClip(directions[i], -1, 1);
@@ -40,7 +40,7 @@ public class LeagueMeet3Teleop extends OpMode {
         Tape Spool Section
          */
         if(gamepad2.left_bumper | gamepad2.right_bumper) {
-            robot.dualTapeSpools.move(gamepad2.left_stick_y, gamepad2.right_stick_y);
+            robot.dualTapeSpools.move(-gamepad2.left_stick_y, -gamepad2.right_stick_y);
         } else if(gamepad2.dpad_up) {
             robot.dualTapeSpools.move(1);
         } else if(gamepad2.dpad_down) {
