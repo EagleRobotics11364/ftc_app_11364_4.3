@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.library.sampling.VuforiaTFODSampler;
 import org.firstinspires.ftc.teamcode.library.systems.LeagueMeet3Robot;
 
 
-@Autonomous(name = "League Meet 3 Auto", group = "Meet3")
+@Autonomous(name = "League Meet 3 Auto Menu", group = "Meet3")
 public class LeagueMeet3AutoMenu extends LinearOpMode {
 
     // robot, core systems variables
