@@ -12,6 +12,7 @@ public class LeagueMeet3Teleop extends OpMode {
     public LeagueMeet3Robot robot;
 
     boolean slow = false;
+    boolean reverse = false;
 
     public void init() {
         robot = new LeagueMeet3Robot(hardwareMap);
@@ -33,8 +34,11 @@ public class LeagueMeet3Teleop extends OpMode {
             directions[i] *= slow ?0.50 : 1; // if slow is true, multiply by 0.25
         }
 
-        robot.holonomic.run(directions[0], directions[1], directions[2]);
+        robot.holonomic.run((reverse?-1:1)*directions[0], (reverse?-1:1)*directions[1], directions[2]);
         telemetry.addData("Drive slow", slow);
+
+        if (gamepad1.a) reverse = false;
+        else if (gamepad1.b) reverse = true;
 
         /*
         Tape Spool Section
@@ -46,6 +50,13 @@ public class LeagueMeet3Teleop extends OpMode {
         } else if(gamepad2.dpad_down) {
             robot.dualTapeSpools.move(-1);
         } else robot.dualTapeSpools.stop();
+
+        /*
+        Emergency Servo Release
+         */
+        if (gamepad2.a) {
+            robot.teamMarkerServo.setPosition(0.15);
+        }
 
         /*
         Color Sensor Telemetry

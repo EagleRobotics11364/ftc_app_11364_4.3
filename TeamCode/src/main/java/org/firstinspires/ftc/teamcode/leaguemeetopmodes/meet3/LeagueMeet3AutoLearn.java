@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.leaguemeetopmodes.meet3;
 import android.graphics.Color;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 
@@ -12,6 +13,7 @@ import org.firstinspires.ftc.teamcode.library.sampling.VuforiaTFODSampler;
 import org.firstinspires.ftc.teamcode.library.systems.LeagueMeet3Robot;
 
 @Autonomous(name = "Autonomous Learn", group = "Meet3")
+@Disabled
 public class LeagueMeet3AutoLearn extends LinearOpMode {
 
     // robot, core systems variables

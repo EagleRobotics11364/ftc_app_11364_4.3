@@ -24,6 +24,7 @@ public class LeagueMeet3AutoMenu extends LinearOpMode {
     private boolean useVuforiaTFOD = false;
     private boolean parkInCrater = false;
     private boolean dropTeamMarker = false;
+    private boolean land = true;
     private int secondsDelay = 0;
 
     // learned variables
@@ -35,19 +36,19 @@ public class LeagueMeet3AutoMenu extends LinearOpMode {
         robot = new LeagueMeet3Robot(hardwareMap);
         robot.teamMarkerServo.setPosition(0);
         IterableMenu iterableMenu = new IterableMenu(telemetry);
-        while (!isStarted() & opModeIsActive()) {
+        while (!isStarted()) {
             if (gamepad1.dpad_up) {
                 iterableMenu.previousItem();
-                while (gamepad1.dpad_up & opModeIsActive()) ;
+                while (gamepad1.dpad_up) ;
             } else if (gamepad1.dpad_down) {
                 iterableMenu.nextItem();
-                while (gamepad1.dpad_down & opModeIsActive()) ;
+                while (gamepad1.dpad_down) ;
             } else if (gamepad1.dpad_left) {
                 iterableMenu.iterateValueBackwards();
-                while (gamepad1.dpad_left & opModeIsActive()) ;
+                while (gamepad1.dpad_left) ;
             } else if (gamepad1.dpad_right) {
                 iterableMenu.iterateValueForward();
-                while (gamepad1.dpad_right & opModeIsActive()) ;
+                while (gamepad1.dpad_right) ;
             }
         }
 
@@ -56,6 +57,7 @@ public class LeagueMeet3AutoMenu extends LinearOpMode {
         secondsDelay = iterableMenu.startDelay.getValue();
         parkInCrater = iterableMenu.parkInCrater.getValue();
         dropTeamMarker = iterableMenu.dropTeamMarker.getValue();
+        land = iterableMenu.land.getValue();
 
         if (useVuforiaTFOD) {
             try {
@@ -70,8 +72,12 @@ public class LeagueMeet3AutoMenu extends LinearOpMode {
         }
 
         // land
-/*        robot.dualTapeSpools.move(1);
-        sleep(14000);*/
+        if (land) {
+            robot.dualTapeSpools.move(1);
+            sleep(11000);
+            robot.dualTapeSpools.stop();
+            drive(-0.2,0,0,400);
+        }
 
         // delay
         sleep(secondsDelay*1000);
@@ -80,17 +86,27 @@ public class LeagueMeet3AutoMenu extends LinearOpMode {
         if (useVuforiaTFOD) doVuforiaSampling();
         else                doColorSensorSampling();
 
-        // team marker
         if (startingPosition == Position.RIGHT) {
-            if (goldSamplePosition == Position.LEFT) drive(0,0,0,0); //set actual values
-            else if (goldSamplePosition == Position.CENTER) drive(0,0,0,0); //set actual values
-            else if (goldSamplePosition == Position.RIGHT) drive(0,0,0,0); //set actual values
-            robot.teamMarkerServo.setPosition(0.10);
-        }
+            if (dropTeamMarker) {
+                if (goldSamplePosition == Position.LEFT) {
+                    drive(0.3,1,0,1500);
+                } else if (goldSamplePosition == Position.CENTER) {
+                    drive(0,1,0,1200);
+                } else if (goldSamplePosition == Position.RIGHT) {
+                    drive(-0.20,1,0,1200);
+                    drive(-0.8, 0, 0, 800);
+                }
+                robot.teamMarkerServo.setPosition(0.15);
+                if (parkInCrater) {
+                    drive(0,0,0.75, 400);
+                    drive(0,-1, 0, 3000);
 
-        // park in crater
-        if (startingPosition == Position.LEFT) {
-            drive(0,0.3,0,500);
+                }
+            }
+        } else if (startingPosition == Position.LEFT) {
+            if (parkInCrater) {
+                drive(0,1,0,800);
+            }
         }
 
         /*
@@ -111,7 +127,7 @@ public class LeagueMeet3AutoMenu extends LinearOpMode {
                     drive(0,0.5, 0, 1);
                     break;
                 case RIGHT:
-                    drive(-0.2, 0.6, 0, 1);
+                    drive(-0.4, 0.6, 0, 1);
                     break;
                 case NULL:
                     doColorSensorSampling();
@@ -128,40 +144,46 @@ public class LeagueMeet3AutoMenu extends LinearOpMode {
         double obtainedHueRight;
         double measuredHue;
 
-        drive(-0.2, -0.6, 0, 1000);
-        robot.holonomic.run(-0.2,-0.3,0);
-        while(colorSensorsAreNotNaN());
+        drive(-0.50*1.2, 0.80*1.2, 0, 500);
+        robot.holonomic.run(-0.20*0.5,0.40*0.5,0);
+        while(colorSensorsAreNaN());
         robot.holonomic.stop();
-        sleep(200);
+        sleep(800);
 
         obtainedHueLeft = ColorOperations.calculateHue(robot.leftColorSensor);
         obtainedHueRight = ColorOperations.calculateHue(robot.rightColorSensor);
         measuredHue = obtainedHueLeft < obtainedHueRight ? obtainedHueLeft : obtainedHueRight; //get lowest read hue value of both sensors
-
+        telemetry.addData("left hue", obtainedHueLeft);
+        telemetry.addData("right hue", obtainedHueRight);
+        telemetry.addData("measured hue", measuredHue);
+        telemetry.update();
         if (measuredHue < FieldSample.HUE_MAXIMUM_GOLD) {
             goldSamplePosition = Position.LEFT;
         } else {
-            robot.holonomic.run(-0.6,0,0);
-            sleep(300);
-            robot.holonomic.run(-0.1,0,0);
-            while(colorSensorsAreNotNaN());
+            robot.holonomic.run(0.6,-0.05,0);
+            sleep(500);
+            robot.holonomic.run(0.3,-0.05,0);
+            while(colorSensorsAreNaN());
             robot.holonomic.stop();
 
             obtainedHueLeft = ColorOperations.calculateHue(robot.leftColorSensor);
             obtainedHueRight = ColorOperations.calculateHue(robot.rightColorSensor);
             measuredHue = obtainedHueLeft < obtainedHueRight ? obtainedHueLeft : obtainedHueRight; //get lowest read hue value of both sensors
-
+            telemetry.addData("left hue", obtainedHueLeft);
+            telemetry.addData("right hue", obtainedHueRight);
+            telemetry.addData("measured hue", measuredHue);
+            telemetry.update();
             if (measuredHue < FieldSample.HUE_MAXIMUM_GOLD) {
                 goldSamplePosition = Position.CENTER;
             } else {
                 goldSamplePosition = Position.RIGHT;
-                drive(-0.6,0,0,500);
+                drive(1,-0.05,0,500);
             }
 
         }
     }
 
-    private boolean colorSensorsAreNotNaN() {
+    private boolean colorSensorsAreNaN() {
         return (Double.isNaN(robot.leftDistanceSensor.getDistance(DistanceUnit.CM)) || Double.isNaN(robot.rightDistanceSensor.getDistance(DistanceUnit.CM)));
     }
 
@@ -176,14 +198,16 @@ public class LeagueMeet3AutoMenu extends LinearOpMode {
         ItemSet<Position> position = new ItemSet<>("Starting Position", Position.LEFT);
         ItemSet<Integer> startDelay = new ItemSet<>("Delay Before Sampling", 0);
         ItemSet<Boolean> parkInCrater = new ItemSet<>("Park in Crater", true);
-        ItemSet<Boolean> dropTeamMarker = new ItemSet<>("Drop Team Marker", true);
+        ItemSet<Boolean> dropTeamMarker = new ItemSet<>("Drop Team Marker (if on right)", true);
+        ItemSet<Boolean> land = new ItemSet<>("Land Robot", true);
         ItemSet<Boolean> useVuforia = new ItemSet<>("Use Vuforia/TFOD", false);
 
-        ItemSet[] items = {position, startDelay, parkInCrater, dropTeamMarker, useVuforia};
+        ItemSet[] items = {position, startDelay, parkInCrater, dropTeamMarker, land,useVuforia};
         int itemsListPosition = 0;
 
         public IterableMenu(Telemetry telemetry) {
             this.telemetry = telemetry;
+            update();
         }
 
         public void nextItem() {
@@ -242,6 +266,13 @@ public class LeagueMeet3AutoMenu extends LinearOpMode {
                     useVuforia.setHasPrevious(true);
                 }
             }
+            else if (item == land) {
+                if (land.getValue() == false) {
+                    land.setValue(true);
+                    land.setHasNext(false);
+                    land.setHasPrevious(true);
+                }
+            }
             update();
         }
 
@@ -287,14 +318,36 @@ public class LeagueMeet3AutoMenu extends LinearOpMode {
                     useVuforia.setHasPrevious(false);
                 }
             }
+            else if (item == land) {
+                if (land.getValue() == false) {
+                    land.setValue(true);
+                    land.setHasNext(false);
+                    land.setHasPrevious(true);
+                }
+            }
             update();
         }
 
         public void update() {
+            updateBoolean(parkInCrater);
+            updateBoolean(dropTeamMarker);
+            updateBoolean(useVuforia);
+            updateBoolean(land);
             for (int i = 0; i<items.length; i++) {
                 ItemSet itemSet = items[i];
-                telemetry.addData((i==itemsListPosition)?"--- ":""+ itemSet.getDescriptor(),
+                telemetry.addData(((i==itemsListPosition)?"--- ":"") + itemSet.getDescriptor(),
                         (itemSet.hasPrevious()?" << ":"") + itemSet.getValue() + (itemSet.hasNext()?" >> ":""));
+            }
+            telemetry.update();
+        }
+
+        private void updateBoolean(ItemSet<Boolean> itemSet) {
+            if (itemSet.getValue()) {
+                itemSet.setHasNext(false);
+                itemSet.setHasPrevious(true);
+            } else {
+                itemSet.setHasNext(true);
+                itemSet.setHasPrevious(false);
             }
         }
 

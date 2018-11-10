@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.leaguemeetopmodes.meet3;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -15,6 +16,7 @@ import java.util.Iterator;
 
 
 @Autonomous(name = "League Meet 3 Auto", group = "Meet3")
+@Disabled
 public class LeagueMeet3Auto extends LinearOpMode {
 
     // robot, core systems variables
