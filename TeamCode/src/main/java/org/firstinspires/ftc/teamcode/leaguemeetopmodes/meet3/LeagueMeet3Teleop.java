@@ -57,6 +57,11 @@ public class LeagueMeet3Teleop extends OpMode {
         if (gamepad2.a) {
             robot.teamMarkerServo.setPosition(0.15);
         }
+        if (gamepad2.x) {
+            robot.craterArm.setPosition(0.47);
+        } else if (gamepad2.y) {
+            robot.craterArm.setPosition(0);
+        }
 
         /*
         Color Sensor Telemetry

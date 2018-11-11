@@ -22,6 +22,7 @@ public class LeagueMeet3Robot {
 
     // Servo Variables
     public Servo teamMarkerServo;
+    public Servo craterArm;
 
     // Color/Distance Sensor Variables
     public ColorSensor leftColorSensor;
@@ -43,6 +44,7 @@ public class LeagueMeet3Robot {
         backTapeMeasure = hardwareMap.dcMotor.get("backTapeMeasure");
 
         teamMarkerServo = hardwareMap.servo.get("teamMarkerServo");
+        craterArm = hardwareMap.servo.get("craterArm");
 
         leftColorSensor = hardwareMap.colorSensor.get("leftColorSensor");
         rightColorSensor = hardwareMap.colorSensor.get("rightColorSensor");

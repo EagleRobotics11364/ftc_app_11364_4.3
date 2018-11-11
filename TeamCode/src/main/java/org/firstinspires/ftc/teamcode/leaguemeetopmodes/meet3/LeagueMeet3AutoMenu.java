@@ -35,6 +35,7 @@ public class LeagueMeet3AutoMenu extends LinearOpMode {
         // init robot
         robot = new LeagueMeet3Robot(hardwareMap);
         robot.teamMarkerServo.setPosition(0);
+        robot.craterArm.setPosition(0.47);
         IterableMenu iterableMenu = new IterableMenu(telemetry);
         while (!isStarted()) {
             if (gamepad1.dpad_up) {
@@ -98,14 +99,18 @@ public class LeagueMeet3AutoMenu extends LinearOpMode {
                 }
                 robot.teamMarkerServo.setPosition(0.15);
                 if (parkInCrater) {
-                    drive(0,0,0.75, 400);
-                    drive(0,-1, 0, 3000);
+                    drive(0,0,0.75, 350);
+                    drive(0,-1, 0, 1750);
+                    robot.craterArm.setPosition(0);
+                    sleep(1000);
 
                 }
             }
         } else if (startingPosition == Position.LEFT) {
             if (parkInCrater) {
-                drive(0,1,0,800);
+                drive(0,0.5,0,800);
+                robot.craterArm.setPosition(0);
+                sleep(1000);
             }
         }
 
@@ -144,8 +149,8 @@ public class LeagueMeet3AutoMenu extends LinearOpMode {
         double obtainedHueRight;
         double measuredHue;
 
-        drive(-0.50*1.2, 0.80*1.2, 0, 500);
-        robot.holonomic.run(-0.20*0.5,0.40*0.5,0);
+        drive(-0.576, 0.96, 0, 500);
+        robot.holonomic.run(-0.12*0.75,0.27*0.75,0);
         while(colorSensorsAreNaN());
         robot.holonomic.stop();
         sleep(800);
@@ -160,9 +165,9 @@ public class LeagueMeet3AutoMenu extends LinearOpMode {
         if (measuredHue < FieldSample.HUE_MAXIMUM_GOLD) {
             goldSamplePosition = Position.LEFT;
         } else {
-            robot.holonomic.run(0.6,-0.05,0);
+            robot.holonomic.run(0.6,-0.03,0);
             sleep(500);
-            robot.holonomic.run(0.3,-0.05,0);
+            robot.holonomic.run(0.3,-0.03,0);
             while(colorSensorsAreNaN());
             robot.holonomic.stop();
 
@@ -177,7 +182,7 @@ public class LeagueMeet3AutoMenu extends LinearOpMode {
                 goldSamplePosition = Position.CENTER;
             } else {
                 goldSamplePosition = Position.RIGHT;
-                drive(1,-0.05,0,500);
+                drive(1,-0.07,0,500);
             }
 
         }
@@ -319,10 +324,10 @@ public class LeagueMeet3AutoMenu extends LinearOpMode {
                 }
             }
             else if (item == land) {
-                if (land.getValue() == false) {
-                    land.setValue(true);
-                    land.setHasNext(false);
-                    land.setHasPrevious(true);
+                if (land.getValue() == true) {
+                    land.setValue(false);
+                    land.setHasNext(true);
+                    land.setHasPrevious(false);
                 }
             }
             update();
