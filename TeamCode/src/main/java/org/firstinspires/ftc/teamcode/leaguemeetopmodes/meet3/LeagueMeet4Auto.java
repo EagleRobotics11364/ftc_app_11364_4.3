@@ -9,11 +9,11 @@ import org.firstinspires.ftc.teamcode.library.functions.ColorOperations;
 import org.firstinspires.ftc.teamcode.library.functions.Position;
 import org.firstinspires.ftc.teamcode.library.sampling.FieldSample;
 import org.firstinspires.ftc.teamcode.library.sampling.VuforiaTFODSampler;
-import org.firstinspires.ftc.teamcode.library.systems.LeagueMeet3Robot;
+import org.firstinspires.ftc.teamcode.library.robot.LeagueMeet3Robot;
 
 
-@Autonomous(name = "League Meet 3 Auto Menu", group = "Meet3")
-public class LeagueMeet3AutoMenu extends LinearOpMode {
+@Autonomous(name = "League Meet 4 Autonomous", group = "Meet3")
+public class LeagueMeet4Auto extends LinearOpMode {
 
     // robot, core systems variables
     private LeagueMeet3Robot robot;

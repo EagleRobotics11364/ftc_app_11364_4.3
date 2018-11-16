@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.library.systems;
+package org.firstinspires.ftc.teamcode.library.robot;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -6,9 +6,11 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.library.robot.systems.DualTapeSpools;
+import org.firstinspires.ftc.teamcode.library.robot.systems.Holonomic;
 
 
-public class LeagueMeet3Robot {
+public class LeagueMeet4Robot {
 
     // Drivetrain (DcMotor) Variables
     public DcMotor frontLeftMotor;
@@ -34,7 +36,7 @@ public class LeagueMeet3Robot {
     public Holonomic holonomic;
     public DualTapeSpools dualTapeSpools;
 
-    public LeagueMeet3Robot(HardwareMap hardwareMap) {
+    public LeagueMeet4Robot(HardwareMap hardwareMap) {
         frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
         backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
         frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");

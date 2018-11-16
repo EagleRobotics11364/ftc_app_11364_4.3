@@ -3,12 +3,12 @@ package org.firstinspires.ftc.teamcode.leaguemeetopmodes.meet3;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.library.systems.LeagueMeet3Robot;
+import org.firstinspires.ftc.teamcode.library.robot.LeagueMeet3Robot;
 
 import static org.firstinspires.ftc.teamcode.library.functions.MathOperations.rangeBuffer;
 import static org.firstinspires.ftc.teamcode.library.functions.MathOperations.rangeClip;
-@TeleOp(name="League Meet 3 Teleop", group="Meet3")
-public class LeagueMeet3Teleop extends OpMode {
+@TeleOp(name="League Meet 4 Teleop", group="Meet3")
+public class LeagueMeet4Teleop extends OpMode {
     public LeagueMeet3Robot robot;
 
     boolean slow = false;
