@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.library.robot.systems.DualTapeSpools;
 import org.firstinspires.ftc.teamcode.library.robot.systems.Holonomic;
 
 
-public class LeagueMeet4Robot {
+public class BaseRobot {
 
     // Drivetrain (DcMotor) Variables
     public DcMotor frontLeftMotor;
@@ -32,11 +32,11 @@ public class LeagueMeet4Robot {
     public DistanceSensor leftDistanceSensor;
     public DistanceSensor rightDistanceSensor;
 
-    // Robot Systems Variables
+    // BaseRobot Systems Variables
     public Holonomic holonomic;
     public DualTapeSpools dualTapeSpools;
 
-    public LeagueMeet4Robot(HardwareMap hardwareMap) {
+    public BaseRobot(HardwareMap hardwareMap) {
         frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
         backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
         frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");

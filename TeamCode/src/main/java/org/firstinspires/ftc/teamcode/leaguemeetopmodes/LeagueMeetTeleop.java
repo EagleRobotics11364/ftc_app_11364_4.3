@@ -1,21 +1,21 @@
-package org.firstinspires.ftc.teamcode.leaguemeetopmodes.meet3;
+package org.firstinspires.ftc.teamcode.leaguemeetopmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.library.robot.LeagueMeet3Robot;
+import org.firstinspires.ftc.teamcode.library.robot.BaseRobot;
 
 import static org.firstinspires.ftc.teamcode.library.functions.MathOperations.rangeBuffer;
 import static org.firstinspires.ftc.teamcode.library.functions.MathOperations.rangeClip;
-@TeleOp(name="League Meet 4 Teleop", group="Meet3")
-public class LeagueMeet4Teleop extends OpMode {
-    public LeagueMeet3Robot robot;
+@TeleOp(name="League Meet 4 Teleop", group="Meet4")
+public class LeagueMeetTeleop extends OpMode {
+    public BaseRobot robot;
 
     boolean slow = false;
     boolean reverse = false;
 
     public void init() {
-        robot = new LeagueMeet3Robot(hardwareMap);
+        robot = new BaseRobot(hardwareMap);
     }
 
     public void loop() {
@@ -69,7 +69,7 @@ public class LeagueMeet4Teleop extends OpMode {
         telemetry.addData("Left red", robot.leftColorSensor.red());
         telemetry.addData("Right red", robot.rightColorSensor.red());
         telemetry.update();
-
+  
     }
 
 

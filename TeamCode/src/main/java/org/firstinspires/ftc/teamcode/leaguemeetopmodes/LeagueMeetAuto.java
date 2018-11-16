@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.leaguemeetopmodes.meet3;
+package org.firstinspires.ftc.teamcode.leaguemeetopmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -7,16 +7,17 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.library.functions.ColorOperations;
 import org.firstinspires.ftc.teamcode.library.functions.Position;
+import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.IterableTelemetryMenu;
+import org.firstinspires.ftc.teamcode.library.robot.BaseRobot;
 import org.firstinspires.ftc.teamcode.library.sampling.FieldSample;
 import org.firstinspires.ftc.teamcode.library.sampling.VuforiaTFODSampler;
-import org.firstinspires.ftc.teamcode.library.robot.LeagueMeet3Robot;
 
 
-@Autonomous(name = "League Meet 4 Autonomous", group = "Meet3")
-public class LeagueMeet4Auto extends LinearOpMode {
+@Autonomous(name = "League Meet 4 Autonomous", group = "Meet4")
+public class LeagueMeetAuto extends LinearOpMode {
 
     // robot, core systems variables
-    private LeagueMeet3Robot robot;
+    private BaseRobot robot;
     private VuforiaTFODSampler vuforiaTFODSampler;
 
     // action variables
@@ -27,13 +28,14 @@ public class LeagueMeet4Auto extends LinearOpMode {
     private boolean land = true;
     private int secondsDelay = 0;
 
+
     // learned variables
     private Position goldSamplePosition = Position.NULL;
 
     @Override
     public void runOpMode() throws InterruptedException {
         // init robot
-        robot = new LeagueMeet3Robot(hardwareMap);
+        robot = new BaseRobot(hardwareMap);
         robot.teamMarkerServo.setPosition(0);
         robot.craterArm.setPosition(0.47);
         IterableMenu iterableMenu = new IterableMenu(telemetry);
@@ -204,7 +206,7 @@ public class LeagueMeet4Auto extends LinearOpMode {
         ItemSet<Integer> startDelay = new ItemSet<>("Delay Before Sampling", 0);
         ItemSet<Boolean> parkInCrater = new ItemSet<>("Park in Crater", true);
         ItemSet<Boolean> dropTeamMarker = new ItemSet<>("Drop Team Marker (if on right)", true);
-        ItemSet<Boolean> land = new ItemSet<>("Land Robot", true);
+        ItemSet<Boolean> land = new ItemSet<>("Land BaseRobot", true);
         ItemSet<Boolean> useVuforia = new ItemSet<>("Use Vuforia/TFOD", false);
 
         ItemSet[] items = {position, startDelay, parkInCrater, dropTeamMarker, land,useVuforia};
