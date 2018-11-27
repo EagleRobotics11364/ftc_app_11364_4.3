@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.library.sampling;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.vuforia.CameraDevice;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -9,6 +10,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class VuforiaTFODSampler {
@@ -47,56 +51,212 @@ public class VuforiaTFODSampler {
         this.telemetry = telemetry;
     }
 
+    /**
+     * Activates the TensorFlow object detector and turns on the phone LED.
+     * @throws NullPointerException if the TensorFlow object detector was not initialized
+     */
     public void activate() {
-        if(tfod != null) tfod.activate();
+        if (tfod != null) {
+            tfod.activate();
+            CameraDevice.getInstance().setFlashTorchMode(true);
+        }
         else throw new NullPointerException();
     }
 
+    /**
+     * Shuts down the TensorFlow object detector to free up system resources.
+     * @throws NullPointerException if the TensorFlow object detector was not initialized
+     */
     public void shutdown() {
-        if(tfod != null) tfod.shutdown();
+        if (tfod != null) {
+            CameraDevice.getInstance().setFlashTorchMode(false);
+            tfod.shutdown();
+        }
         else throw new NullPointerException();
     }
 
+    /**
+     * Identifies the position of the gold sample on the Field.
+     * Assumes that the robot is viewing all three samples.
+     *
+     * @return The position of the gold sample on the Field.
+    */
+    public Position recognize() {
+        return recognize(Position.CENTER);
+    }
+
+    /**
+     * Identifies the position of the gold sample on the Field.
+     * @param cameraViewingDirection Angle at which the phone camera views the field samples.
+     *                               Position.LEFT   -> Camera views Left and Center samples
+     *                               Position.CENTER -> Camera views all three samples.
+     *                               Position.RIGHT  -> Camera views Center and Right samples.
+     * @return The position of the gold sample on the Field.
+     * @throws NullPointerException if the TensorFlow object detector was not initialized.
+     */
     public Position recognize(Position cameraViewingDirection) {
         if (tfod != null) {
             // getUpdatedRecognitions() will return null if no new information is available since
             // the last time that call was made.
             List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
             if (updatedRecognitions != null) {
-                if (telemetry != null) telemetry.addData("# Object Detected", updatedRecognitions.size());
-                if (updatedRecognitions.size() == 3) {
-                    int goldMineralX = -1;
-                    int silverMineral1X = -1;
-                    int silverMineral2X = -1;
-                    for (Recognition recognition : updatedRecognitions) {
-                        if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
-                            goldMineralX = (int) recognition.getLeft();
-
-                        } else if (silverMineral1X == -1) {
-                            silverMineral1X = (int) recognition.getLeft();
-                        } else {
-                            silverMineral2X = (int) recognition.getLeft();
-                        }
-                    }
-                    if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
-                        if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
-                            if (telemetry != null) telemetry.addData("Gold Mineral Position", "Left");
-                            return Position.LEFT;
-                        } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
-                            if (telemetry != null) telemetry.addData("Gold Mineral Position", "Right");
+                if (telemetry != null)
+                    telemetry.addData("# Object Detected", updatedRecognitions.size());
+                List<Recognition> finalRecognitions = new ArrayList<>();
+                if (cameraViewingDirection == Position.LEFT || cameraViewingDirection == Position.RIGHT) {
+                    if (updatedRecognitions.size() >= 2) {
+                        if (updatedRecognitions.size() > 2) {
+                            try{
+                                finalRecognitions.addAll(getSpecifiedRecognitionsOfLargestWidth(updatedRecognitions, 2));
+                            } catch (NotEnoughRecognitionsException e) { return Position.NULL; }
+                        } else finalRecognitions = new ArrayList<>(updatedRecognitions);
+                        Recognition mineral1 = finalRecognitions.get(0);
+                        Recognition mineral2 = finalRecognitions.get(1);
+                        if (mineral1.getLabel().equals(LABEL_SILVER_MINERAL) & mineral2.getLabel().equals(LABEL_SILVER_MINERAL))
                             return Position.RIGHT;
-                        } else {
-                            if (telemetry != null) telemetry.addData("Gold Mineral Position", "Center");
-                            return Position.CENTER;
+                        else if (cameraViewingDirection == Position.LEFT) {
+                            if (mineral1.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                if (mineral1.getLeft() < mineral2.getLeft()) return Position.LEFT;
+                                else return Position.CENTER;
+                            } else {
+                                if (mineral2.getLeft() < mineral1.getLeft()) return Position.LEFT;
+                                else return Position.CENTER;
+                            }
+                        } else { // cameraViewingDirection == Position.RIGHT
+                            if (mineral1.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                if (mineral1.getLeft() < mineral2.getLeft()) return Position.CENTER;
+                                else return Position.RIGHT;
+                            } else {
+                                if (mineral2.getLeft() < mineral1.getLeft()) return Position.CENTER;
+                                else return Position.RIGHT;
+                            }
                         }
+
+                    } else return Position.NULL;
+                } else if (cameraViewingDirection == Position.CENTER) {
+                    if (updatedRecognitions.size() >= 3) {
+                        if (updatedRecognitions.size() > 3) {
+                            try{
+                                finalRecognitions.addAll(getSpecifiedRecognitionsOfLargestWidth(updatedRecognitions, 1, FieldSample.GOLD));
+                                finalRecognitions.addAll(getSpecifiedRecognitionsOfLargestWidth(updatedRecognitions, 2, FieldSample.SILVER));
+                            } catch (NotEnoughRecognitionsException e) { return Position.NULL; }
+                        } else finalRecognitions = new ArrayList<>(updatedRecognitions);
+                        int goldMineralX = -1;
+                        int silverMineral1X = -1;
+                        int silverMineral2X = -1;
+                        for (Recognition recognition : finalRecognitions) {
+                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                goldMineralX = (int) recognition.getLeft();
+
+                            } else if (silverMineral1X == -1) {
+                                silverMineral1X = (int) recognition.getLeft();
+                            } else {
+                                silverMineral2X = (int) recognition.getLeft();
+                            }
+                        }
+                        if (goldMineralX != -1 && silverMineral1X != -1 && silverMineral2X != -1) {
+                            if (goldMineralX < silverMineral1X && goldMineralX < silverMineral2X) {
+                                if (telemetry != null)
+                                    telemetry.addData("Gold Mineral Position", "Left");
+                                return Position.LEFT;
+                            } else if (goldMineralX > silverMineral1X && goldMineralX > silverMineral2X) {
+                                if (telemetry != null)
+                                    telemetry.addData("Gold Mineral Position", "Right");
+                                return Position.RIGHT;
+                            } else {
+                                if (telemetry != null)
+                                    telemetry.addData("Gold Mineral Position", "Center");
+                                return Position.CENTER;
+                            }
+                        }
+                    } else {
+                        return Position.NULL;
                     }
+
                 }
+
                 if (telemetry != null) telemetry.update();
             }
         } else throw new NullPointerException();
         return Position.NULL;
     }
 
+    /**
+     *
+     * @param recognitions The list containing the original items identified by the TensorFlow interpreter.
+     * @param numberToGet The number of field sample Recognitions to return as a new List object.
+     * @return List object containing field sample recognitions of largest width.
+     */
+    private List<Recognition> getSpecifiedRecognitionsOfLargestWidth(List<Recognition> recognitions, int numberToGet) throws NotEnoughRecognitionsException{
+        return getSpecifiedRecognitionsOfLargestWidth(recognitions, numberToGet, FieldSample.NULL);
+    }
 
-    public class UnsupportedHardwareException extends Exception {}
+    /**
+     *
+     * @param recognitions The list containing the original items identified by the TensorFlow interpreter.
+     * @param numberToGet The number of field sample Recognitions to return as a new List object.
+     * @param color Filter to only return field samples of a specific color.
+     * @return List object containing field sample recognitions of largest width.
+     */
+    private List<Recognition> getSpecifiedRecognitionsOfLargestWidth(List<Recognition> recognitions, int numberToGet, FieldSample color) throws NotEnoughRecognitionsException {
+        // create list to be sorted (sortedRecognitions), and a second list to hold only the specified number of elements (finalRecognitions)
+        List<Recognition> sortedRecognitions = new ArrayList<>(recognitions);
+        List<Recognition> finalRecognitions = new ArrayList<>();
+
+        // remove elements in sortedRecognitions that are not of the specified color
+        for (Recognition recognition : sortedRecognitions) {
+            switch (color) {
+                case GOLD:
+                    if (recognition.getLabel().equals(LABEL_GOLD_MINERAL))
+                        finalRecognitions.add(recognition);
+                    break;
+                case SILVER:
+                    if (recognition.getLabel().equals(LABEL_SILVER_MINERAL))
+                        finalRecognitions.add(recognition);
+                    break;
+                default:
+                    finalRecognitions.add(recognition);
+            }
+        }
+        sortedRecognitions = new ArrayList<>(finalRecognitions);
+        // sort the sortedRecognitions by calling Collections.sort() and creating an anonymous instantiation of Comparator
+        Collections.sort(sortedRecognitions,
+                new Comparator<Recognition>() {
+                    @Override
+                    public int compare(Recognition recognition, Recognition t1) {
+                        if (recognition.getWidth() < t1.getWidth()) return -1;
+                        else if (recognition.getWidth() == t1.getWidth()) return 0;
+                        else return 1;
+                    }
+                });
+
+        finalRecognitions = new ArrayList<>();
+        // add largest sorted items to the finalRecognitions list
+        if (sortedRecognitions.size() < numberToGet) throw new NotEnoughRecognitionsException(sortedRecognitions.size(), numberToGet);
+        else if (sortedRecognitions.size() == numberToGet) return sortedRecognitions;
+        else {
+            finalRecognitions = new ArrayList<>();
+            for (int i = sortedRecognitions.size(); i > sortedRecognitions.size() - numberToGet; i--) {
+                finalRecognitions.add(sortedRecognitions.get(i - 1));
+            }
+        }
+        return finalRecognitions;
+    }
+
+    public class VuforiaTFODException extends Exception {
+        public VuforiaTFODException() {
+            super();
+        }
+        public VuforiaTFODException(String detailMessage) {
+            super(detailMessage);
+        }
+    }
+
+    public class UnsupportedHardwareException extends VuforiaTFODException { }
+
+    private class NotEnoughRecognitionsException extends VuforiaTFODException {
+        public NotEnoughRecognitionsException(int listSize, int neededRecognitionQuantity) {
+            super("List contains "+listSize+ " recognitions; needed "+neededRecognitionQuantity);
+        }
+    }
 }

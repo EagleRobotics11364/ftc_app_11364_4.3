@@ -8,6 +8,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.library.functions.ColorOperations;
 import org.firstinspires.ftc.teamcode.library.functions.Position;
 import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.IterableTelemetryMenu;
+import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.MenuItem;
+import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.MenuItemBoolean;
+import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.MenuItemEnum;
+import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.MenuItemInteger;
 import org.firstinspires.ftc.teamcode.library.robot.BaseRobot;
 import org.firstinspires.ftc.teamcode.library.sampling.FieldSample;
 import org.firstinspires.ftc.teamcode.library.sampling.VuforiaTFODSampler;
@@ -27,7 +31,7 @@ public class LeagueMeetAuto extends LinearOpMode {
     private boolean dropTeamMarker = false;
     private boolean land = true;
     private int secondsDelay = 0;
-
+    private IterableTelemetryMenu menu;
 
     // learned variables
     private Position goldSamplePosition = Position.NULL;
@@ -38,29 +42,8 @@ public class LeagueMeetAuto extends LinearOpMode {
         robot = new BaseRobot(hardwareMap);
         robot.teamMarkerServo.setPosition(0);
         robot.craterArm.setPosition(0.47);
-        IterableMenu iterableMenu = new IterableMenu(telemetry);
-        while (!isStarted()) {
-            if (gamepad1.dpad_up) {
-                iterableMenu.previousItem();
-                while (gamepad1.dpad_up) ;
-            } else if (gamepad1.dpad_down) {
-                iterableMenu.nextItem();
-                while (gamepad1.dpad_down) ;
-            } else if (gamepad1.dpad_left) {
-                iterableMenu.iterateValueBackwards();
-                while (gamepad1.dpad_left) ;
-            } else if (gamepad1.dpad_right) {
-                iterableMenu.iterateValueForward();
-                while (gamepad1.dpad_right) ;
-            }
-        }
 
-        startingPosition = iterableMenu.position.getValue();
-        useVuforiaTFOD = iterableMenu.useVuforia.getValue();
-        secondsDelay = iterableMenu.startDelay.getValue();
-        parkInCrater = iterableMenu.parkInCrater.getValue();
-        dropTeamMarker = iterableMenu.dropTeamMarker.getValue();
-        land = iterableMenu.land.getValue();
+        runPreMatchTelemetryMenu();
 
         if (useVuforiaTFOD) {
             try {
@@ -200,205 +183,37 @@ public class LeagueMeetAuto extends LinearOpMode {
         robot.holonomic.stop();
     }
 
-    private class IterableMenu {
-        Telemetry telemetry;
-        ItemSet<Position> position = new ItemSet<>("Starting Position", Position.LEFT);
-        ItemSet<Integer> startDelay = new ItemSet<>("Delay Before Sampling", 0);
-        ItemSet<Boolean> parkInCrater = new ItemSet<>("Park in Crater", true);
-        ItemSet<Boolean> dropTeamMarker = new ItemSet<>("Drop Team Marker (if on right)", true);
-        ItemSet<Boolean> land = new ItemSet<>("Land BaseRobot", true);
-        ItemSet<Boolean> useVuforia = new ItemSet<>("Use Vuforia/TFOD", false);
+    private void runPreMatchTelemetryMenu() {
+        menu = new IterableTelemetryMenu(telemetry);
+        MenuItemEnum<Position> i_startingPosition = new MenuItemEnum<Position>("startingPosition", "Starting Position", Position.LEFT, Position.RIGHT);
+        MenuItemBoolean i_useVuforia = new MenuItemBoolean("useVuforia", "Use Vuforia/TFOD", true);
+        MenuItemInteger i_startDelay = new MenuItemInteger("startDelay", "Delay Before Sampling", 0, 0, 15);
+        MenuItemBoolean i_parkInCrater = new MenuItemBoolean("craterPark", "Park in Crater", true);
+        MenuItemBoolean i_dropTeamMarker = new MenuItemBoolean("marker", "Drop Team Marker", true);
+        MenuItemBoolean i_land = new MenuItemBoolean("land", "Deploy from Lander", true);
+        menu.add(i_startingPosition, i_useVuforia, i_startDelay, i_parkInCrater, i_dropTeamMarker, i_land);
 
-        ItemSet[] items = {position, startDelay, parkInCrater, dropTeamMarker, land,useVuforia};
-        int itemsListPosition = 0;
-
-        public IterableMenu(Telemetry telemetry) {
-            this.telemetry = telemetry;
-            update();
-        }
-
-        public void nextItem() {
-            if (itemsListPosition < items.length) {
-                itemsListPosition++;
-                update();
-            }
-        }
-
-        public void previousItem() {
-            if (itemsListPosition > 0) {
-                itemsListPosition--;
-                update();
+        while (!isStarted()&&!isStopRequested()) {
+            if (gamepad1.dpad_up) {
+                menu.previousItem();
+                while (gamepad1.dpad_up) ;
+            } else if (gamepad1.dpad_down) {
+                menu.nextItem();
+                while (gamepad1.dpad_down) ;
+            } else if (gamepad1.dpad_left) {
+                menu.iterateBackward();
+                while (gamepad1.dpad_left) ;
+            } else if (gamepad1.dpad_right) {
+                menu.iterateForward();
+                while (gamepad1.dpad_right) ;
             }
         }
-
-        public void iterateValueForward() {
-            ItemSet item = items[itemsListPosition];
-            if (item == position) {
-                if (position.getValue() == Position.LEFT) {
-                    position.setValue(Position.RIGHT);
-                    position.setHasNext(false);
-                    position.setHasPrevious(true);
-                }
-            }
-            else if (item == startDelay) {
-                if (startDelay.getValue() < 15) {
-                    startDelay.setValue(startDelay.getValue() + 1);
-                    if (startDelay.getValue() == 15) {
-                        startDelay.setHasNext(false);
-                        startDelay.setHasPrevious(true);
-                    } else {
-                        startDelay.setHasNext(true);
-                        startDelay.setHasPrevious(true);
-                    }
-                }
-            }
-            else if (item == parkInCrater) {
-                if (parkInCrater.getValue() == false) {
-                    parkInCrater.setValue(true);
-                    parkInCrater.setHasNext(false);
-                    parkInCrater.setHasPrevious(true);
-                }
-            }
-            else if (item == dropTeamMarker) {
-                if (dropTeamMarker.getValue() == false) {
-                    dropTeamMarker.setValue(true);
-                    dropTeamMarker.setHasNext(false);
-                    dropTeamMarker.setHasPrevious(true);
-                }
-            }
-            else if (item == useVuforia) {
-                if (useVuforia.getValue() == false) {
-                    useVuforia.setValue(true);
-                    useVuforia.setHasNext(false);
-                    useVuforia.setHasPrevious(true);
-                }
-            }
-            else if (item == land) {
-                if (land.getValue() == false) {
-                    land.setValue(true);
-                    land.setHasNext(false);
-                    land.setHasPrevious(true);
-                }
-            }
-            update();
-        }
-
-        public void iterateValueBackwards() {
-            ItemSet item = items[itemsListPosition];
-            if (item == position) {
-                if (position.getValue() == Position.RIGHT) {
-                    position.setValue(Position.LEFT);
-                    position.setHasNext(true);
-                    position.setHasPrevious(false);
-                }
-            }
-            else if (item == startDelay) {
-                if (startDelay.getValue() > 0) {
-                    startDelay.setValue(startDelay.getValue() - 1);
-                    if (startDelay.getValue() == 0) {
-                        startDelay.setHasNext(true);
-                        startDelay.setHasPrevious(false);
-                    } else {
-                        startDelay.setHasNext(true);
-                        startDelay.setHasPrevious(true);
-                    }
-                }
-            }
-            else if (item == parkInCrater) {
-                if (parkInCrater.getValue() == true) {
-                    parkInCrater.setValue(false);
-                    parkInCrater.setHasNext(true);
-                    parkInCrater.setHasPrevious(false);
-                }
-            }
-            else if (item == dropTeamMarker) {
-                if (dropTeamMarker.getValue() == true) {
-                    dropTeamMarker.setValue(false);
-                    dropTeamMarker.setHasNext(true);
-                    dropTeamMarker.setHasPrevious(false);
-                }
-            }
-            else if (item == useVuforia) {
-                if (useVuforia.getValue() == true) {
-                    useVuforia.setValue(false);
-                    useVuforia.setHasNext(true);
-                    useVuforia.setHasPrevious(false);
-                }
-            }
-            else if (item == land) {
-                if (land.getValue() == true) {
-                    land.setValue(false);
-                    land.setHasNext(true);
-                    land.setHasPrevious(false);
-                }
-            }
-            update();
-        }
-
-        public void update() {
-            updateBoolean(parkInCrater);
-            updateBoolean(dropTeamMarker);
-            updateBoolean(useVuforia);
-            updateBoolean(land);
-            for (int i = 0; i<items.length; i++) {
-                ItemSet itemSet = items[i];
-                telemetry.addData(((i==itemsListPosition)?"--- ":"") + itemSet.getDescriptor(),
-                        (itemSet.hasPrevious()?" << ":"") + itemSet.getValue() + (itemSet.hasNext()?" >> ":""));
-            }
-            telemetry.update();
-        }
-
-        private void updateBoolean(ItemSet<Boolean> itemSet) {
-            if (itemSet.getValue()) {
-                itemSet.setHasNext(false);
-                itemSet.setHasPrevious(true);
-            } else {
-                itemSet.setHasNext(true);
-                itemSet.setHasPrevious(false);
-            }
-        }
-
-        private class ItemSet<T> {
-            private String descriptor;
-            private T value;
-            private boolean hasNext = true;
-            private boolean hasPrevious = false;
-
-            public ItemSet(String descriptor, T value) {
-                this.descriptor = descriptor;
-                this.value = value;
-            }
-
-            public String getDescriptor() {
-                return descriptor;
-            }
-
-            public T getValue() {
-                return value;
-            }
-
-            public void setValue(T value) {
-                this.value = value;
-            }
-
-            public boolean hasNext() {
-                return hasNext;
-            }
-
-            public void setHasNext(boolean hasNext) {
-                this.hasNext = hasNext;
-            }
-
-            public boolean hasPrevious() {
-                return hasPrevious;
-            }
-
-            public void setHasPrevious(boolean hasPrevious) {
-                this.hasPrevious = hasPrevious;
-            }
-        }
-
-
-
+        if (isStopRequested()) return;
+        startingPosition = i_startingPosition.getValue();
+        useVuforiaTFOD = i_useVuforia.getValue();
+        parkInCrater = i_parkInCrater.getValue();
+        dropTeamMarker = i_dropTeamMarker.getValue();
+        secondsDelay = i_startDelay.getValue();
+        land = i_land.getValue();
     }
 }

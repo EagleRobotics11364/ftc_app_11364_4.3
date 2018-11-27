@@ -24,7 +24,7 @@ public class ColorSensorTest extends OpMode {
 
     @Override
     public void loop() {
-        if(gamepad1.a) {
+        if (gamepad1.a) {
             enableLED = true;
         } else if (gamepad1.b) {
             enableLED = false;
@@ -37,9 +37,5 @@ public class ColorSensorTest extends OpMode {
         telemetry.addData("blue", colorSensor.blue());
         telemetry.addData("led", enableLED);
         telemetry.update();
-        telemetry.
-
-
-
     }
 }
