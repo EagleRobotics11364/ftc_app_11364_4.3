@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.library.robot.systems;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -14,10 +15,10 @@ public class IMUDrivetrainController {
     private Orientation imuAOriginalOrientation;
 //    private Orientation imuBOriginalOrientation;
 
-    private Drivetrain drivetrain;
+    private Holonomic drivetrain;
 
 
-    public IMUDrivetrainController(BNO055IMU imuA, Drivetrain drivetrain) {
+    public IMUDrivetrainController(BNO055IMU imuA, Holonomic drivetrain) {
         this.imuA = imuA;
         this.drivetrain = drivetrain;
     }
@@ -39,6 +40,28 @@ public class IMUDrivetrainController {
                 drivetrain.run(0,finalPower);
             }
         }
+    }
+
+    public void rotateSuper(int target) {
+        target = -target;
+        ElapsedTime time = new ElapsedTime();
+        time.reset();
+        time.startTime();
+        float temp = getCurrentIMUOrientation().firstAngle;
+        while (time.seconds() < 8) {
+            temp = getCurrentIMUOrientation().firstAngle;
+
+            if (target > 0 && temp < 0) {
+                drivetrain.run(0, 0, .40 - (time.seconds() * .05));
+            } else if (target < 0 && temp > 0) {
+                drivetrain.run(0, 0, -.40 + (time.seconds() * .05));
+            } else if (temp > target) {
+                drivetrain.run(0, 0, .40 - (time.seconds() * .05));
+            } else if (temp < target) {
+                drivetrain.run(0, 0, -.40 + (time.seconds() * .05));
+            }
+        }
+        drivetrain.stop();
     }
 
     public Orientation getCurrentIMUOrientation() {
