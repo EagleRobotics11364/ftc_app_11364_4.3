@@ -110,7 +110,41 @@ public class Holonomic extends Drivetrain {
         run(xPower, yPower, 0);*/
     }
 
-    public void setMotorsMode(DcMotor.RunMode runMode) {
+    public void runUsingEncoderNormal(int xDistance, int yDistance, double power, DistanceUnit distanceUnit) {
+
+        int xEncoder = (int)(xDistance / Math.sqrt(2));
+        int yEncoder = (int)(yDistance / Math.sqrt(2));
+
+        double xPower = power;
+        double yPower = power;
+
+        int xFrontLeft = (xEncoder + yEncoder);
+        int xFrontRight = (-xEncoder + yEncoder);
+        
+        if (xFrontLeft > xFrontRight) {
+            xPower = power;
+            yPower = (xFrontRight / xFrontLeft) * power;
+        } else if (xFrontLeft > xFrontRight) {
+            xPower = (xFrontRight / xFrontLeft) * power;
+            yPower = power;
+        }
+
+        setMotorsMode(STOP_AND_RESET_ENCODER);
+
+        //set encoder targets
+        frontLeftMotor.setTargetPosition(xEncoder + yEncoder);
+        frontRightMotor.setTargetPosition(-xEncoder + yEncoder);
+        backLeftMotor.setTargetPosition(xEncoder + -yEncoder);
+        backRightMotor.setTargetPosition(-xEncoder + -yEncoder);
+
+        setMotorsMode(RUN_TO_POSITION);
+        frontLeftMotor.setPower(xPower);
+        frontRightMotor.setPower(yPower);
+        backLeftMotor.setPower(-yPower);
+        backRightMotor.setPower(-xPower);
+    }
+
+        public void setMotorsMode(DcMotor.RunMode runMode) {
         frontLeftMotor.setMode(runMode);
         frontRightMotor.setMode(runMode);
         backLeftMotor.setMode(runMode);
