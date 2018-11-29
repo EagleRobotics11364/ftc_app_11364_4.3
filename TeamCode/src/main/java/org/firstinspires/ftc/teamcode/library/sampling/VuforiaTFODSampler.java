@@ -112,24 +112,22 @@ public class VuforiaTFODSampler {
                         } else finalRecognitions = new ArrayList<>(updatedRecognitions);
                         Recognition mineral1 = finalRecognitions.get(0);
                         Recognition mineral2 = finalRecognitions.get(1);
-                        if (mineral1.getLabel().equals(LABEL_SILVER_MINERAL) & mineral2.getLabel().equals(LABEL_SILVER_MINERAL))
-                            return Position.RIGHT;
-                        else if (cameraViewingDirection == Position.LEFT) {
+                        if (cameraViewingDirection == Position.LEFT) {
                             if (mineral1.getLabel().equals(LABEL_GOLD_MINERAL)) {
                                 if (mineral1.getLeft() < mineral2.getLeft()) return Position.LEFT;
                                 else return Position.CENTER;
-                            } else {
+                            } else if (mineral2.getLabel().equals(LABEL_GOLD_MINERAL)){
                                 if (mineral2.getLeft() < mineral1.getLeft()) return Position.LEFT;
                                 else return Position.CENTER;
-                            }
+                            } else return Position.RIGHT;
                         } else { // cameraViewingDirection == Position.RIGHT
                             if (mineral1.getLabel().equals(LABEL_GOLD_MINERAL)) {
                                 if (mineral1.getLeft() < mineral2.getLeft()) return Position.CENTER;
                                 else return Position.RIGHT;
-                            } else {
+                            } else  if (mineral2.getLabel().equals(LABEL_GOLD_MINERAL)){
                                 if (mineral2.getLeft() < mineral1.getLeft()) return Position.CENTER;
                                 else return Position.RIGHT;
-                            }
+                            } else return Position.LEFT;
                         }
 
                     } else return Position.NULL;
