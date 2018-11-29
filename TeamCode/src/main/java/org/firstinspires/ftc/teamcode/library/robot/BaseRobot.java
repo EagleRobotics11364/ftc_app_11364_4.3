@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.library.robot;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
@@ -36,6 +37,9 @@ public class BaseRobot {
     public Holonomic holonomic;
     public DualTapeSpools dualTapeSpools;
 
+//    public BNO055IMU imuA;
+//    public BNO055IMU imuB;
+
     public BaseRobot(HardwareMap hardwareMap) {
         frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
         backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
@@ -53,6 +57,9 @@ public class BaseRobot {
 
         leftDistanceSensor = hardwareMap.get(DistanceSensor.class, "leftColorSensor");
         rightDistanceSensor = hardwareMap.get(DistanceSensor.class, "rightColorSensor");
+
+//        imuA = hardwareMap.get(BNO055IMU.class, "imuA");
+//        imuB = hardwareMap.get(BNO055IMU.class, "imuB");
 
         holonomic = new Holonomic(frontLeftMotor, backLeftMotor,frontRightMotor,backRightMotor);
         dualTapeSpools = new DualTapeSpools(frontTapeMeasure, backTapeMeasure);
