@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.library.robot.BaseRobot;
 import org.firstinspires.ftc.teamcode.library.robot.systems.IMUDrivetrainController;
 
-@TeleOp(name = "Color Sensor Test", group = "Test")
+@TeleOp(name = "Actual IMU Test", group = "Test")
 //@Disabled
 public class IMUActualTestOpMode extends LinearOpMode {
 
