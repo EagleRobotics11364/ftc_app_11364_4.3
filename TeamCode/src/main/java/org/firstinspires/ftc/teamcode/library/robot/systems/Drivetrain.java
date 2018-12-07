@@ -8,8 +8,6 @@ public abstract class Drivetrain implements Stoppable {
     DcMotor backLeftMotor;
     DcMotor backRightMotor;
 
-    public abstract void run(double y, double z);
-
     public void stop() {
         frontLeftMotor.setPower(0);
         frontRightMotor.setPower(0);

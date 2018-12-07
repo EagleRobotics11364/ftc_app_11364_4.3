@@ -34,7 +34,7 @@ public class LeagueMeetTeleop extends OpMode {
             directions[i] *= slow ?0.50 : 1; // if slow is true, multiply by 0.25
         }
 
-        robot.holonomic.run((reverse?-1:1)*directions[0], (reverse?-1:1)*directions[1], directions[2]);
+        robot.holonomic.runWithoutEncoder((reverse?-1:1)*directions[0], (reverse?-1:1)*directions[1], directions[2]);
         telemetry.addData("Drive slow", slow);
 
         if (gamepad1.a) reverse = false;
@@ -55,13 +55,11 @@ public class LeagueMeetTeleop extends OpMode {
         Emergency Servo Release
          */
         if (gamepad2.a) {
-            robot.teamMarkerServo.setPosition(0.15);
+            robot.teamMarkerServo.setPosition(0);
+        } if (gamepad2.b) {
+            robot.teamMarkerServo.setPosition(0.20);
         }
-        if (gamepad2.x) {
-            robot.craterArm.setPosition(0.47);
-        } else if (gamepad2.y) {
-            robot.craterArm.setPosition(0);
-        }
+
 
         /*
         Color Sensor Telemetry

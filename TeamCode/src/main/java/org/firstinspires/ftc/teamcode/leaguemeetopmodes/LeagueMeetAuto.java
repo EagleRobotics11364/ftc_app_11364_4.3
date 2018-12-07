@@ -40,7 +40,7 @@ public class LeagueMeetAuto extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         // init robot
         robot = new BaseRobot(hardwareMap);
-        robot.teamMarkerServo.setPosition(0);
+        robot.teamMarkerServo.setPosition(0.20);
         robot.craterArm.setPosition(0.47);
 
         runPreMatchTelemetryMenu();
@@ -60,9 +60,9 @@ public class LeagueMeetAuto extends LinearOpMode {
         // land
         if (land) {
             robot.dualTapeSpools.move(1);
-            sleep(11000);
+            sleep(8000);
             robot.dualTapeSpools.stop();
-            drive(-0.2,0,0,400);
+            drive(-0.3,0,0,600);
         }
 
         // delay
@@ -79,17 +79,25 @@ public class LeagueMeetAuto extends LinearOpMode {
                 } else if (goldSamplePosition == Position.CENTER) {
                     drive(0,1,0,1200);
                 } else if (goldSamplePosition == Position.RIGHT) {
-                    drive(-0.20,1,0,1200);
-                    drive(-0.8, 0, 0, 800);
+                    drive(-0.20,0.7,0,1400);
+                    robot.teamMarkerServo.setPosition(0);
+                    if(parkInCrater) {
+                        drive(0.8,-1,0,2000);
+                        drive(0.5,0,0,2000);
+                        drive(0,-0.5, 0, 1000);
+                    }
+//                    drive(-0.8, 0, 0, 800);
                 }
-                robot.teamMarkerServo.setPosition(0.15);
-                if (parkInCrater) {
+                robot.teamMarkerServo.setPosition(0);
+
+
+                /*if (parkInCrater) {
                     drive(0,0,0.75, 350);
                     drive(0,-1, 0, 1750);
-                    robot.craterArm.setPosition(0);
+//                    robot.craterArm.setPosition(0);
                     sleep(1000);
 
-                }
+                }*/
             }
         } else if (startingPosition == Position.LEFT) {
             if (parkInCrater) {
@@ -98,7 +106,7 @@ public class LeagueMeetAuto extends LinearOpMode {
                 sleep(1000);
             }
         }
-
+        sleep(1000);
         /*
 
 
@@ -134,8 +142,8 @@ public class LeagueMeetAuto extends LinearOpMode {
         double obtainedHueRight;
         double measuredHue;
 
-        drive(-0.576, 0.96, 0, 500);
-        robot.holonomic.run(-0.12*0.75,0.27*0.75,0);
+        drive(-0.58, 0.96, 0, 500);
+        robot.holonomic.runWithoutEncoder(-0.12*0.75,0.27*0.75,0);
         while(colorSensorsAreNaN());
         robot.holonomic.stop();
         sleep(800);
@@ -150,9 +158,9 @@ public class LeagueMeetAuto extends LinearOpMode {
         if (measuredHue < FieldSample.HUE_MAXIMUM_GOLD) {
             goldSamplePosition = Position.LEFT;
         } else {
-            robot.holonomic.run(0.6,-0.03,0);
+            robot.holonomic.runWithoutEncoder(0.6,0,0);
             sleep(500);
-            robot.holonomic.run(0.3,-0.03,0);
+            robot.holonomic.runWithoutEncoder(0.3,0,0);
             while(colorSensorsAreNaN());
             robot.holonomic.stop();
 
@@ -167,7 +175,7 @@ public class LeagueMeetAuto extends LinearOpMode {
                 goldSamplePosition = Position.CENTER;
             } else {
                 goldSamplePosition = Position.RIGHT;
-                drive(1,-0.07,0,500);
+                drive(1,-0.20,0,750);
             }
 
         }
@@ -178,7 +186,7 @@ public class LeagueMeetAuto extends LinearOpMode {
     }
 
     private void drive(double x, double y, double z, long duration) {
-        robot.holonomic.run(x, y, z);
+        robot.holonomic.runWithoutEncoder(x, y, z);
         sleep(duration);
         robot.holonomic.stop();
     }

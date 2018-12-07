@@ -6,18 +6,20 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.library.robot.BaseRobot;
 
-
 @Autonomous(name="Encoder Test OpMode", group = "Test")
 //@Disabled
 public class EncoderTestOpMode extends LinearOpMode {
     BaseRobot robot;
 
-
     @Override
     public void runOpMode() throws InterruptedException {
-
         robot = new BaseRobot(hardwareMap);
-        robot.holonomic.runUsingEncoderNormal(12, 24, 0.5, DistanceUnit.INCH);
-        sleep(1000);
+        waitForStart();
+        robot.holonomic.runUsingEncoder(0, 40, 0.3f);
+        while(robot.holonomic.motorsAreBusy() & opModeIsActive());
+        robot.holonomic.stop();
+        robot.holonomic.runUsingEncoder(40, 0, 0.3f);
+        while(robot.holonomic.motorsAreBusy() & opModeIsActive());
+        robot.holonomic.stop();
     }
 }

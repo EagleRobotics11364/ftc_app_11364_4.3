@@ -1,18 +1,31 @@
 package org.firstinspires.ftc.teamcode.library.robot.systems;
 
+import com.qualcomm.robotcore.factory.RobotFactory;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.library.functions.MathOperations;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_TO_POSITION;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODER;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_WITHOUT_ENCODER;
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
 
 public class Holonomic extends Drivetrain {
 
-    public final double WHEEL_DIAMETER = 4;
-    public final double TICKS_PER_REVOLUTION = 288;
-    public final double INCHES_PER_TICK;
+    private final double WHEEL_DIAMETER = 4;
+    private final double WHEEL_CIRCUMFERENCE;
+    private final double TICKS_PER_REVOLUTION = 288;
+    private final double TICKS_PER_INCH;
+    //original = front and left
+
+    private final double ANGLE_LEFT_FRONT = 45+90;
+    private final double ANGLE_LEFT_REAR = 135+90;
+    private final double ANGLE_RIGHT_REAR = 225+90;
+    private final double ANGLE_RIGHT_FRONT = 315+90;
+    //+0 =   right and front
+    //+90 =  front and left
+    //+270 = back and right
 
     public Holonomic(DcMotor frontLeftMotor, DcMotor frontRightMotor, DcMotor backLeftMotor, DcMotor backRightMotor) {
         super.frontLeftMotor = frontLeftMotor;
@@ -20,15 +33,15 @@ public class Holonomic extends Drivetrain {
         super.backLeftMotor = backLeftMotor;
         super.backRightMotor = backRightMotor;
 
-        INCHES_PER_TICK = (WHEEL_DIAMETER * Math.PI) / TICKS_PER_REVOLUTION;
+        WHEEL_CIRCUMFERENCE = (WHEEL_DIAMETER * Math.PI);
+        TICKS_PER_INCH = TICKS_PER_REVOLUTION / WHEEL_CIRCUMFERENCE;
     }
 
-    @Override
-    public void run(double y, double z) {
+    private void run(double y, double z) {
         run(0, y, z);
     }
 
-    public void run(double x, double y, double z) {
+    private void run(double x, double y, double z) {
         x = MathOperations.rangeClip(x, -1, 1);
         y = MathOperations.rangeClip(y, -1, 1);
         z = MathOperations.rangeClip(z, -1, 1);
@@ -44,107 +57,77 @@ public class Holonomic extends Drivetrain {
 
     }
 
-    public void runUsingEncoder(int xDistance, int yDistance, double power, DistanceUnit distanceUnit) {
-
-        int xEncoder = (int)(xDistance / INCHES_PER_TICK);
-        int yEncoder = (int)(yDistance / INCHES_PER_TICK);
-
-        double xPower = power;
-        double yPower = power;
-
-        if (xDistance > yDistance) {
-            xPower = power;
-            yPower = (yDistance / xDistance) * power;
-        } else if (yDistance > xDistance) {
-            xPower = (xDistance / yDistance) * power;
-            yPower = power;
-        }
-
-        setMotorsMode(STOP_AND_RESET_ENCODER);
-
-        //set encoder targets
-        frontLeftMotor.setTargetPosition(xEncoder);
-        frontRightMotor.setTargetPosition(yEncoder);
-        backLeftMotor.setTargetPosition(-yEncoder);
-        backRightMotor.setTargetPosition(-xEncoder);
-
-        setMotorsMode(RUN_TO_POSITION);
-        
-        frontLeftMotor.setPower(xPower);
-        frontRightMotor.setPower(yPower);
-        backLeftMotor.setPower(-yPower);
-        backRightMotor.setPower(-xPower);
-
-        /*final double MULTIPLY_FACTOR = Math.cos((1/(Math.PI * 4)));
-        double xPower;
-        double yPower;
-        double xEncoderTarget;
-        double yEncoderTarget;
-        if (xDistance > yDistance) {
-            xPower = power;
-            yPower = power * (xDistance/yDistance);
-        } else if (xDistance < yDistance) {
-            yPower = power;
-            xPower = power * (xDistance/yDistance);
-        } else {
-            xPower = yPower = power;
-        }
-
-        setMotorsMode(STOP_AND_RESET_ENCODER);
-
-        xEncoderTarget = xDistance * MULTIPLY_FACTOR;
-        yEncoderTarget = yDistance * MULTIPLY_FACTOR;
-
-        int leftFrontTarget = xDistance + yDistance;
-        int leftRearTarget = xDistance - yDistance;
-        int rightFrontTarget = -xDistance + yDistance;
-        int rightRearTarget = -xDistance - yDistance;
-
-        setMotorsMode(RUN_TO_POSITION);
-
-        frontLeftMotor.setTargetPosition(leftFrontTarget);
-        backLeftMotor.setTargetPosition(leftRearTarget);
-        frontLeftMotor.setTargetPosition(rightFrontTarget);
-        backRightMotor.setTargetPosition(rightRearTarget);
-
-        run(xPower, yPower, 0);*/
+    public void runWithoutEncoder(double x, double y, double z) {
+        setMotorsMode(RUN_WITHOUT_ENCODER);
+        run(x, y, z);
     }
 
-    public void runUsingEncoderNormal(int xDistance, int yDistance, double power, DistanceUnit distanceUnit) {
+    public void runUsingEncoder(double x, double y, float power) {
+        double relativeAngle;
+        double distancePerWheel;
 
-        int xEncoder = (int)(xDistance / Math.sqrt(2));
-        int yEncoder = (int)(yDistance / Math.sqrt(2));
+        int leftFrontDistance;
+        int leftRearDistance;
+        int rightRearDistance;
+        int rightFrontDistance;
 
-        double xPower = power;
-        double yPower = power;
+        double leftFrontPower;
+        double leftRearPower;
+        double rightRearPower;
+        double rightFrontPower;
 
-        int xFrontLeft = (xEncoder + yEncoder);
-        int xFrontRight = (-xEncoder + yEncoder);
-        
-        if (xFrontLeft > xFrontRight) {
-            xPower = power;
-            yPower = (xFrontRight / xFrontLeft) * power;
-        } else if (xFrontLeft > xFrontRight) {
-            xPower = (xFrontRight / xFrontLeft) * power;
-            yPower = power;
-        }
+        double leftFrontCos;
+        double leftRearCos;
+        double rightRearCos;
+        double rightFrontCos;
 
         setMotorsMode(STOP_AND_RESET_ENCODER);
 
-        //set encoder targets
-        frontLeftMotor.setTargetPosition(xEncoder + yEncoder);
-        frontRightMotor.setTargetPosition(-xEncoder + yEncoder);
-        backLeftMotor.setTargetPosition(xEncoder + -yEncoder);
-        backRightMotor.setTargetPosition(-xEncoder + -yEncoder);
+        try {
+            relativeAngle = Math.toDegrees(Math.atan(y/x));
+        } catch (ArithmeticException e ) {
+            if (y > 0) relativeAngle = 90;
+            else relativeAngle = 270;
+        }
+
+        distancePerWheel = Math.sqrt(Math.pow(x,2)+Math.pow(y,2));
+
+        leftFrontCos = Math.cos(Math.toRadians(ANGLE_LEFT_FRONT - relativeAngle));
+        leftRearCos = Math.cos(Math.toRadians(ANGLE_LEFT_REAR - relativeAngle));
+        rightRearCos = Math.cos(Math.toRadians(ANGLE_RIGHT_REAR - relativeAngle));
+        rightFrontCos = Math.cos(Math.toRadians(ANGLE_RIGHT_FRONT - relativeAngle));
+
+        leftFrontDistance = (int) (distancePerWheel * leftFrontCos);
+        leftRearDistance = (int) (distancePerWheel * leftRearCos);
+        rightRearDistance = (int) (distancePerWheel * rightRearCos);
+        rightFrontDistance = (int) (distancePerWheel * rightFrontCos);
+
+        leftFrontPower = power * leftFrontCos;
+        leftRearPower = power * leftRearCos;
+        rightRearPower = power * rightRearCos;
+        rightFrontPower = power * rightFrontCos;
+
+
+        frontLeftMotor.setTargetPosition((int)(leftFrontDistance * TICKS_PER_INCH));
+        backLeftMotor.setTargetPosition((int)(leftRearDistance * TICKS_PER_INCH));
+        backRightMotor.setTargetPosition((int)(rightRearDistance * TICKS_PER_INCH));
+        frontRightMotor.setTargetPosition((int)(rightFrontDistance * TICKS_PER_INCH));
+
+        frontLeftMotor.setPower(leftFrontPower);
+        backLeftMotor.setPower(leftRearPower);
+        backRightMotor.setPower(rightRearPower);
+        frontRightMotor.setPower(rightFrontPower);
 
         setMotorsMode(RUN_TO_POSITION);
-        frontLeftMotor.setPower(xPower);
-        frontRightMotor.setPower(yPower);
-        backLeftMotor.setPower(-yPower);
-        backRightMotor.setPower(-xPower);
     }
 
-        public void setMotorsMode(DcMotor.RunMode runMode) {
+    public boolean motorsAreBusy() {
+        if (frontLeftMotor.isBusy() | frontLeftMotor.isBusy() | backLeftMotor.isBusy() | backRightMotor.isBusy()) return true;
+        else return false;
+    }
+
+
+    public void setMotorsMode(DcMotor.RunMode runMode) {
         frontLeftMotor.setMode(runMode);
         frontRightMotor.setMode(runMode);
         backLeftMotor.setMode(runMode);
