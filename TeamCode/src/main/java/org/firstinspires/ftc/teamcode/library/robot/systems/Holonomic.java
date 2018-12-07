@@ -23,9 +23,7 @@ public class Holonomic extends Drivetrain {
     private final double ANGLE_LEFT_REAR = 135+90;
     private final double ANGLE_RIGHT_REAR = 225+90;
     private final double ANGLE_RIGHT_FRONT = 315+90;
-    //+0 =   right and front
-    //+90 =  front and left
-    //+270 = back and right
+
 
     public Holonomic(DcMotor frontLeftMotor, DcMotor frontRightMotor, DcMotor backLeftMotor, DcMotor backRightMotor) {
         super.frontLeftMotor = frontLeftMotor;
@@ -80,6 +78,8 @@ public class Holonomic extends Drivetrain {
         double leftRearCos;
         double rightRearCos;
         double rightFrontCos;
+
+        x = -x;
 
         setMotorsMode(STOP_AND_RESET_ENCODER);
 
