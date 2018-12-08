@@ -17,7 +17,7 @@ public class Holonomic extends Drivetrain {
     private final double WHEEL_CIRCUMFERENCE;
     private final double TICKS_PER_REVOLUTION = 288;
     private final double TICKS_PER_INCH;
-    //original = front and left
+    private final double DIAGONAL_BETWEEN_WHEELS = Math.sqrt(2)*16;
 
     private final double ANGLE_LEFT_FRONT = 45+90;
     private final double ANGLE_LEFT_REAR = 135+90;
@@ -33,10 +33,6 @@ public class Holonomic extends Drivetrain {
 
         WHEEL_CIRCUMFERENCE = (WHEEL_DIAMETER * Math.PI);
         TICKS_PER_INCH = TICKS_PER_REVOLUTION / WHEEL_CIRCUMFERENCE;
-    }
-
-    private void run(double y, double z) {
-        run(0, y, z);
     }
 
     private void run(double x, double y, double z) {
@@ -119,6 +115,19 @@ public class Holonomic extends Drivetrain {
         frontRightMotor.setPower(rightFrontPower);
 
         setMotorsMode(RUN_TO_POSITION);
+    }
+
+    public void turnUsingEncoder(double degrees, double power) {
+        int targetPosition = (int) (degrees * TICKS_PER_REVOLUTION * (DIAGONAL_BETWEEN_WHEELS / (360 * WHEEL_DIAMETER)));
+        setMotorsMode(STOP_AND_RESET_ENCODER);
+        frontLeftMotor.setTargetPosition(targetPosition);
+        frontRightMotor.setTargetPosition(targetPosition);
+        backLeftMotor.setTargetPosition(targetPosition);
+        backRightMotor.setTargetPosition(targetPosition);
+        frontLeftMotor.setPower(power);
+        frontRightMotor.setPower(power);
+        backLeftMotor.setPower(power);
+        backRightMotor.setPower(power);
     }
 
     public boolean motorsAreBusy() {
