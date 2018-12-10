@@ -40,7 +40,7 @@ public class LeagueMeetAuto extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         // init robot
         robot = new BaseRobot(hardwareMap);
-        robot.teamMarkerServo.setPosition(0.20);
+        robot.teamMarkerServo.setPosition(0);
         robot.craterArm.setPosition(0.47);
 
         runPreMatchTelemetryMenu();
@@ -80,7 +80,7 @@ public class LeagueMeetAuto extends LinearOpMode {
                     drive(0,1,0,1200);
                 } else if (goldSamplePosition == Position.RIGHT) {
                     drive(-0.20,0.7,0,1400);
-                    robot.teamMarkerServo.setPosition(0);
+                    robot.teamMarkerServo.setPosition(0.10);
                     if(parkInCrater) {
                         drive(0.8,-1,0,2000);
                         drive(0.5,0,0,2000);
@@ -88,7 +88,7 @@ public class LeagueMeetAuto extends LinearOpMode {
                     }
 //                    drive(-0.8, 0, 0, 800);
                 }
-                robot.teamMarkerServo.setPosition(0);
+                robot.teamMarkerServo.setPosition(0.10);
 
 
                 /*if (parkInCrater) {
