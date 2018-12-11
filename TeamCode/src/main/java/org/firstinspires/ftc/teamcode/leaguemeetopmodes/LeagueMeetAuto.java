@@ -158,9 +158,9 @@ public class LeagueMeetAuto extends LinearOpMode {
         if (measuredHue < FieldSample.HUE_MAXIMUM_GOLD) {
             goldSamplePosition = Position.LEFT;
         } else {
-            robot.holonomic.runWithoutEncoder(0.6,0,0);
+            robot.holonomic.runWithoutEncoder(0.6,-0.06,0);
             sleep(500);
-            robot.holonomic.runWithoutEncoder(0.3,0,0);
+            robot.holonomic.runWithoutEncoder(0.3,-0.02,0);
             while(colorSensorsAreNaN());
             robot.holonomic.stop();
 
