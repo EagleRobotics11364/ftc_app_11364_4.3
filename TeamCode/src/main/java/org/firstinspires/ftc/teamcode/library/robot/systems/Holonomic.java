@@ -120,6 +120,7 @@ public class Holonomic extends Drivetrain {
     public void runUsingEncoder(double xTarget, double yTarget, double inputPower) {
         double r;
         double theta;
+        double axisConversionAngle = Math.PI/4;
         double xPrime;
         double yPrime;
         double xPower;
@@ -141,15 +142,15 @@ public class Holonomic extends Drivetrain {
 
         // calculate theta
         if (xTarget == 0) xTarget = 0.00001;
-        theta = Math.toDegrees(Math.atan(yTarget / xTarget));
-        if (theta < 0) theta += 180;
+        theta = Math.atan(yTarget / xTarget);
+        if (theta < 0) theta += Math.PI;
 
         // calculate x and y prime
-        xPrime = r * Math.cos(Math.toRadians(theta - 45));
-        yPrime = r * Math.sin(Math.toRadians(theta - 45));
+        xPrime = r * Math.cos(theta - axisConversionAngle);
+        yPrime = r * Math.sin(theta - axisConversionAngle);
 
         // calculate x and y power
-        if (yPrime > xPrime) {
+        if (Math.abs(yPrime) > Math.abs(xPrime)) {
             yPower = inputPower;
             xPower = inputPower * (xPrime / yPrime);
         } else {
@@ -176,10 +177,10 @@ public class Holonomic extends Drivetrain {
         frontRightMotor.setTargetPosition((int)(RFDistanceIN * TICKS_PER_INCH));
 
         // program motor power targets
-        frontLeftMotor.setPower((int)(LFPower * TICKS_PER_INCH));
-        backLeftMotor.setPower((int)(LRPower * TICKS_PER_INCH));
-        backRightMotor.setPower((int)(RRPower * TICKS_PER_INCH));
-        frontRightMotor.setPower((int)(RFPower * TICKS_PER_INCH));
+        frontLeftMotor.setPower(LFPower);
+        backLeftMotor.setPower(LRPower);
+        backRightMotor.setPower(RRPower);
+        frontRightMotor.setPower(RFPower);
 
         // set motors mode
         setMotorsMode(RUN_USING_ENCODER);
