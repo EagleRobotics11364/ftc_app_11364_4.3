@@ -25,7 +25,7 @@ public class Holonomic extends Drivetrain {
     private final double ANGLE_RIGHT_FRONT = 315 + 270;
 
 
-    public Holonomic(DcMotor frontLeftMotor, DcMotor frontRightMotor, DcMotor backLeftMotor, DcMotor backRightMotor) {
+    public Holonomic(DcMotor frontLeftMotor, DcMotor backLeftMotor, DcMotor frontRightMotor, DcMotor backRightMotor) {
         super.frontLeftMotor = frontLeftMotor;
         super.frontRightMotor = frontRightMotor;
         super.backLeftMotor = backLeftMotor;
@@ -41,8 +41,8 @@ public class Holonomic extends Drivetrain {
         z = MathOperations.rangeClip(z, -1, 1);
 
         double leftFrontPower = x + y + z;
-        double leftRearPower = x - y + z;
-        double rightFrontPower = -x + y + z;
+        double leftRearPower = -x + y + z;
+        double rightFrontPower = x - y + z;
         double rightRearPower = -x - y + z;
         frontLeftMotor.setPower(leftFrontPower);
         backLeftMotor.setPower(leftRearPower);
@@ -139,12 +139,10 @@ public class Holonomic extends Drivetrain {
 
         // calculate r
         r = Math.sqrt(Math.pow(xTarget,2)+Math.pow(yTarget,2));
-
         // calculate theta
         if (xTarget == 0) xTarget = 0.00001;
         theta = Math.atan(yTarget / xTarget);
-        if (theta < 0) theta += Math.PI;
-
+        if (xTarget < 0) theta += Math.PI;
         // calculate x and y prime
         xPrime = r * Math.cos(theta - axisConversionAngle);
         yPrime = r * Math.sin(theta - axisConversionAngle);
@@ -183,7 +181,7 @@ public class Holonomic extends Drivetrain {
         frontRightMotor.setPower(RFPower);
 
         // set motors mode
-        setMotorsMode(RUN_USING_ENCODER);
+        setMotorsMode(RUN_TO_POSITION);
     }
 
     public void turnUsingEncoder(double degrees, double power) {
@@ -213,4 +211,9 @@ public class Holonomic extends Drivetrain {
         backRightMotor.setMode(runMode);
     }
 
+    @Override
+    public void stop() {
+        setMotorsMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        super.stop();
+    }
 }

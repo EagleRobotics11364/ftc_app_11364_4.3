@@ -29,7 +29,8 @@
 
 package org.firstinspires.ftc.teamcode.testopmodes;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -38,9 +39,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 /**
  * Demonstrates empty OpMode
  */
-@TeleOp(name = "Basic Motor Test", group = "Test")
+@Autonomous(name = "Basic Encoder Test", group = "Test")
 //@Disabled
-public class BasicMotorTest extends OpMode {
+public class BasicEncoderTest extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -50,49 +51,37 @@ public class BasicMotorTest extends OpMode {
     DcMotor backRightMotor;
 
     @Override
-    public void init() {
-        telemetry.addData("Status", "Initialized");
-
-        // Get motors from map
+    public void runOpMode() throws InterruptedException {
         frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
         backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
         frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
         backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
-
+        waitForStart();
+//        run(frontLeftMotor);
+//        while(!gamepad1.a& opModeIsActive());
+//        run(frontLeftMotor);
+//        while(!gamepad1.a& opModeIsActive());
+//        run(backLeftMotor);
+//        while(!gamepad1.a& opModeIsActive());
+//        run(backRightMotor);
+        run4(frontLeftMotor,0.5,162);
+        run4(backLeftMotor,0.5,162);
+        run4(backRightMotor,-0.5,-162);
+        run4(frontRightMotor,-0.5,-162);
+        while(opModeIsActive() & frontLeftMotor.isBusy());
     }
-
-    /*
-     * Code to run when the op mode is first enabled goes here
-     * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#start()
-     */
-    @Override
-    public void init_loop() {
+    public void run(DcMotor motor) {
+        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setTargetPosition(288);
+        motor.setPower(0.5);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        while(motor.isBusy() & opModeIsActive());
+        motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
-
-    /*
-     * This method will be called ONCE when start is pressed
-     * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#loop()
-     */
-    @Override
-    public void start() {
-        runtime.reset();
+    public void run4(DcMotor motor,double power, int position) {
+        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setPower(power);
+        motor.setTargetPosition(position);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
-
-    /*
-     * This method will be called repeatedly in a loop
-     * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#loop()
-     */
-    @Override
-    public void loop(){
-
-            float y = gamepad1.left_stick_y;
-            frontLeftMotor.setPower(y);
-            frontRightMotor.setPower(y);
-            backLeftMotor.setPower(y);
-            backRightMotor.setPower(y);
-            telemetry.addData("y",y);
-
-
-    }
-
 }
