@@ -1,38 +1,41 @@
 package org.firstinspires.ftc.teamcode.library.robot.systems;
 
-import com.qualcomm.robotcore.factory.RobotFactory;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.library.functions.MathOperations;
 
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_TO_POSITION;
-import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODER;
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_WITHOUT_ENCODER;
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
 
 public class Holonomic extends Drivetrain {
 
-    private final double WHEEL_DIAMETER = 4;
-    private final double WHEEL_CIRCUMFERENCE;
-    private final double TICKS_PER_REVOLUTION = 288;
-    private final double TICKS_PER_INCH;
-    private final double DIAGONAL_BETWEEN_WHEELS = Math.sqrt(2) * 16;
+    private static final double WHEEL_DIAMETER = 4;
+    private static final double WHEEL_CIRCUMFERENCE;
+    private static final double TICKS_PER_REVOLUTION = 288;
+    private static final double TICKS_PER_INCH;
+    private static final double DIAGONAL_BETWEEN_WHEELS = Math.sqrt(2) * 16;
 
-    private final double ANGLE_LEFT_FRONT = 45 + 270;
-    private final double ANGLE_LEFT_REAR = 135 + 270;
-    private final double ANGLE_RIGHT_REAR = 225 + 270;
-    private final double ANGLE_RIGHT_FRONT = 315 + 270;
+    private static final double ANGLE_LEFT_FRONT = 45 + 270;
+    private static final double ANGLE_LEFT_REAR = 135 + 270;
+    private static final double ANGLE_RIGHT_REAR = 225 + 270;
+    private static final double ANGLE_RIGHT_FRONT = 315 + 270;
 
+    private static final int TARGET_POSITION_TOLERANCE = 15;
 
-    public Holonomic(DcMotor frontLeftMotor, DcMotor frontRightMotor, DcMotor backLeftMotor, DcMotor backRightMotor) {
+    static {
+        WHEEL_CIRCUMFERENCE = (WHEEL_DIAMETER * Math.PI);
+        TICKS_PER_INCH = TICKS_PER_REVOLUTION / WHEEL_CIRCUMFERENCE;
+    }
+
+    public Holonomic(DcMotor frontLeftMotor, DcMotor backLeftMotor, DcMotor frontRightMotor, DcMotor backRightMotor) {
         super.frontLeftMotor = frontLeftMotor;
         super.frontRightMotor = frontRightMotor;
         super.backLeftMotor = backLeftMotor;
         super.backRightMotor = backRightMotor;
 
-        WHEEL_CIRCUMFERENCE = (WHEEL_DIAMETER * Math.PI);
-        TICKS_PER_INCH = TICKS_PER_REVOLUTION / WHEEL_CIRCUMFERENCE;
+
     }
 
     private void run(double x, double y, double z) {
@@ -41,14 +44,18 @@ public class Holonomic extends Drivetrain {
         z = MathOperations.rangeClip(z, -1, 1);
 
         double leftFrontPower = x + y + z;
-        double leftRearPower = x - y + z;
-        double rightFrontPower = -x + y + z;
+        double leftRearPower = -x + y + z;
+        double rightFrontPower = x - y + z;
         double rightRearPower = -x - y + z;
         frontLeftMotor.setPower(leftFrontPower);
         backLeftMotor.setPower(leftRearPower);
         frontRightMotor.setPower(rightFrontPower);
         backRightMotor.setPower(rightRearPower);
 
+        ((DcMotorEx)frontLeftMotor).setTargetPositionTolerance(TARGET_POSITION_TOLERANCE);
+        ((DcMotorEx)backLeftMotor).setTargetPositionTolerance(TARGET_POSITION_TOLERANCE);
+        ((DcMotorEx)frontRightMotor).setTargetPositionTolerance(TARGET_POSITION_TOLERANCE);
+        ((DcMotorEx)backRightMotor).setTargetPositionTolerance(TARGET_POSITION_TOLERANCE);
     }
 
     public void runWithoutEncoder(double x, double y, double z) {
@@ -139,12 +146,10 @@ public class Holonomic extends Drivetrain {
 
         // calculate r
         r = Math.sqrt(Math.pow(xTarget,2)+Math.pow(yTarget,2));
-
         // calculate theta
         if (xTarget == 0) xTarget = 0.00001;
         theta = Math.atan(yTarget / xTarget);
-        if (theta < 0) theta += Math.PI;
-
+        if (xTarget < 0) theta += Math.PI;
         // calculate x and y prime
         xPrime = r * Math.cos(theta - axisConversionAngle);
         yPrime = r * Math.sin(theta - axisConversionAngle);
@@ -183,7 +188,7 @@ public class Holonomic extends Drivetrain {
         frontRightMotor.setPower(RFPower);
 
         // set motors mode
-        setMotorsMode(RUN_USING_ENCODER);
+        setMotorsMode(RUN_TO_POSITION);
     }
 
     public void turnUsingEncoder(double degrees, double power) {
@@ -213,4 +218,9 @@ public class Holonomic extends Drivetrain {
         backRightMotor.setMode(runMode);
     }
 
+    @Override
+    public void stop() {
+        setMotorsMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        super.stop();
+    }
 }
