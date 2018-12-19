@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.library.sampling.FieldSample;
 import org.firstinspires.ftc.teamcode.library.sampling.VuforiaTFODSampler;
 
 
-@Autonomous(name = "League Meet 4 Autonomous", group = "Meet4")
+@Autonomous(name = "BETA: Encoder Autonomous", group = "LT")
 public class LeagueMeetAuto extends LinearOpMode {
 
     // robot, core systems variables
@@ -75,9 +75,13 @@ public class LeagueMeetAuto extends LinearOpMode {
         if (startingPosition == Position.RIGHT) {
             if (dropTeamMarker) {
                 if (goldSamplePosition == Position.LEFT) {
-                    strafeUsingEncoder(15,24,0.6);
+                    strafeUsingEncoder(2,32,0.8);
+                    strafeUsingEncoder(0,-5,0.5);
+                    turnUsingEncoder(90,0.6);
+                    strafeUsingEncoder(-10,0,0.6);
                 } else if (goldSamplePosition == Position.CENTER) {
-                    strafeUsingEncoder(0,24,0.6);
+                    strafeUsingEncoder(0,30,0.6);
+                    turnUsingEncoder(45,0.6);
                 } else if (goldSamplePosition == Position.RIGHT) {
                     strafeUsingEncoder(0,24,0.6);
                     robot.teamMarkerServo.setPosition(0.10);
@@ -88,16 +92,21 @@ public class LeagueMeetAuto extends LinearOpMode {
                     }
 //                    drive(-0.8, 0, 0, 800);
                 }
+                sleep(1000);
                 robot.teamMarkerServo.setPosition(0.10);
-
-
-                /*if (parkInCrater) {
-                    drive(0,0,0.75, 350);
-                    drive(0,-1, 0, 1750);
-//                    robot.craterArm.setPosition(0);
+                if (parkInCrater) {
                     sleep(1000);
+//                    drive(0,0,0.75, 350);
+//                    drive(0,-1, 0, 1750);
+////                    robot.craterArm.setPosition(0);
+//                    sleep(1000);
+                    if (goldSamplePosition == Position.LEFT) {
+                        strafeUsingEncoder(10,-10,0.8);
+                        turnUsingEncoder(-45,0.7);
+                        strafeUsingEncoder(0,-62,1);
 
-                }*/
+                    }
+                }
             }
         } else if (startingPosition == Position.LEFT) {
             if (parkInCrater) {
@@ -142,7 +151,7 @@ public class LeagueMeetAuto extends LinearOpMode {
         double obtainedHueRight;
         double measuredHue;
 
-        strafeUsingEncoder(-11, 17,0.4);
+        strafeUsingEncoder(-12, 19,0.7);
         sleep(800);
 
         obtainedHueLeft = ColorOperations.calculateHue(robot.leftColorSensor);
