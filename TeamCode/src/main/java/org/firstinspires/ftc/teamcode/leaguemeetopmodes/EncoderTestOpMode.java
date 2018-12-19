@@ -44,9 +44,14 @@ public class EncoderTestOpMode extends LinearOpMode {
 //        while(robot.holonomic.motorsAreBusy() & opModeIsActive());
 //        robot.holonomic.stop();
 //        while(!gamepad1.a & opModeIsActive());
-        robot.holonomic.runUsingEncoder(-13, 10, 0.5f); // back right
-        while(robot.holonomic.motorsAreBusy() & opModeIsActive());
-        while(!gamepad1.a & opModeIsActive());
-        robot.holonomic.stop();
+//        robot.holonomic.runUsingEncoder(-13, 10, 0.5f); // back right
+//        while(robot.holonomic.motorsAreBusy() & opModeIsActive());
+//        while(!gamepad1.a & opModeIsActive());
+//        robot.holonomic.stop();
+        turnUsingEncoder(90,0.5);
+    }
+    private void turnUsingEncoder(double degrees, double power) {
+        robot.holonomic.turnUsingEncoder(degrees,power);
+        while (opModeIsActive() & robot.holonomic.motorsAreBusy());
     }
 }
