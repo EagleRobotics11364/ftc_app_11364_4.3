@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.library.sampling.FieldSample;
 import org.firstinspires.ftc.teamcode.library.sampling.VuforiaTFODSampler;
 
 
-@Autonomous(name = "League Meet 4 Autonomous", group = "Meet4")
+@Autonomous(name = "BETA: Encoder Autonomous", group = "LT")
 public class LeagueMeetAuto extends LinearOpMode {
 
     // robot, core systems variables
@@ -60,57 +60,107 @@ public class LeagueMeetAuto extends LinearOpMode {
         // land
         if (land) {
             robot.dualTapeSpools.move(1);
-            sleep(8000);
+            sleep(7000);
             robot.dualTapeSpools.stop();
-            drive(-0.3,0,0,600);
+            strafeUsingEncoder(-2.5,0,0.3);
         }
 
         // delay
         sleep(secondsDelay*1000);
-
+        telemetry.setAutoClear(false);
         // sample
         if (useVuforiaTFOD) doVuforiaSampling();
         else                doColorSensorSampling();
 
-        if (startingPosition == Position.RIGHT) {
-            if (dropTeamMarker) {
-                if (goldSamplePosition == Position.LEFT) {
-                    drive(0.3,1,0,1500);
-                } else if (goldSamplePosition == Position.CENTER) {
-                    drive(0,1,0,1200);
-                } else if (goldSamplePosition == Position.RIGHT) {
-                    drive(-0.20,0.7,0,1400);
-                    robot.teamMarkerServo.setPosition(0.10);
-                    if(parkInCrater) {
-                        drive(0.8,-1,0,2000);
-                        drive(0.5,0,0,2000);
-                        drive(0,-0.5, 0, 1000);
+        telemetry.addData("Gold Sample Position", goldSamplePosition);
+        telemetry.update();
+        telemetry.setAutoClear(true);
+
+        switch (startingPosition) {
+            case LEFT:                      // START LEFT POSITION
+                strafeUsingEncoder(0,7,0.6);
+                if (dropTeamMarker) {       // start left position -> DROP TEAM MARKER
+                    strafeUsingEncoder(0,-9,0.6);
+                    int baselineStrafe = -35;
+                    switch (goldSamplePosition) {
+                        case LEFT:          // start left position -> drop team marker -> LEFT SAMPLE POSITION
+                            // Our baseline position. Only strafe x = -20
+                            strafeUsingEncoder(baselineStrafe,0,0.9);
+                            break;
+                        case CENTER:        // start left position -> drop team marker -> CENTER SAMPLE POSITION
+                            // Strafe baseline along with -14.5 in.
+                            strafeUsingEncoder(baselineStrafe + -14.5,0,0.9);
+                            break;
+                        case RIGHT:         // start left position -> drop team marker -> RIGHT SAMPLE POSITION
+                            // Strafe baseline and center, along with -14.5 in.
+                            strafeUsingEncoder(baselineStrafe + -14.5 + -14.5,0, 0.9);
+                            break;
                     }
-//                    drive(-0.8, 0, 0, 800);
+                    turnUsingEncoder(-45,0.7);
+                    strafeUsingEncoder(0,7,0.6);
+                    strafeUsingEncoder(-40,3.5,1);
+                    robot.teamMarkerServo.setPosition(0.10);
+                    sleep(200);
+                    strafeUsingEncoder(20,4,1);
+                    strafeUsingEncoder(70,5,1);
+
+                } else if (parkInCrater) { // start left position -> PARK IN CRATER
+                    strafeUsingEncoder(0,10,0.65);
                 }
-                robot.teamMarkerServo.setPosition(0.10);
+                break;
+            case RIGHT:                     // START RIGHT POSITION
+                if (dropTeamMarker) {       // start right position -> DROP TEAM MARKER
+                    switch (goldSamplePosition) {
+                        case LEFT:          // start right position -> drop team marker -> LEFT SAMPLE POSITION
+                            strafeUsingEncoder(2,32,0.8);
+                            strafeUsingEncoder(0,-5,0.5);
+                            turnUsingEncoder(90,0.6);
+                            strafeUsingEncoder(-10,0,0.6);
+                            break;
+                        case CENTER:        // start right position -> drop team marker -> CENTER SAMPLE POSITION
+                            strafeUsingEncoder(0,30,0.6);
+                            turnUsingEncoder(45,0.6);
+                            robot.teamMarkerServo.setPosition(0.10);
+                            strafeUsingEncoder(-14,-14,0.8);
+                            break;
+                        case RIGHT:         // start right position -> drop team marker -> RIGHT SAMPLE POSITION
+                            strafeUsingEncoder(0,30,0.8);
+                            turnUsingEncoder(45,0.6);
+                            strafeUsingEncoder(-22,0,0.7);
+                            robot.teamMarkerServo.setPosition(0.10);
+                            sleep(500);
+                            strafeUsingEncoder(-3,-10,0.7);
+                            break;
+                    }
 
-
-                /*if (parkInCrater) {
-                    drive(0,0,0.75, 350);
-                    drive(0,-1, 0, 1750);
-//                    robot.craterArm.setPosition(0);
                     sleep(1000);
+                    robot.teamMarkerServo.setPosition(0.10);
 
-                }*/
-            }
-        } else if (startingPosition == Position.LEFT) {
-            if (parkInCrater) {
-                drive(0,0.5,0,800);
-                robot.craterArm.setPosition(0);
-                sleep(1000);
-            }
+                    if (parkInCrater) {     // start right position -> drop team marker -> any sample position -> PARK IN CRATER
+                        sleep(1000);
+
+                        switch(goldSamplePosition) {
+                            case LEFT:      // start right position -> drop team marker -> any sample position -> park in crater -> LEFT SAMPLE POSITION
+                                strafeUsingEncoder(10,-10,0.8);
+                                turnUsingEncoder(-45,0.7);
+                                strafeUsingEncoder(0,-62,1);
+                                break;
+                            case CENTER:    // start right position -> drop team marker -> any sample position ->park in crater -> CENTER SAMPLE POSITION
+                                strafeUsingEncoder(0,-62,1);
+                                break;
+                            case RIGHT:     // start right position -> drop team marker -> any sample position ->park in crater -> RIGHT SAMPLE POSITION
+                                strafeUsingEncoder(0,-62,1);
+                                break;
+                        }
+                    }
+                }
+                break;
         }
         sleep(1000);
         /*
 
 
-        */
+         */
 
     }
 
@@ -142,10 +192,7 @@ public class LeagueMeetAuto extends LinearOpMode {
         double obtainedHueRight;
         double measuredHue;
 
-        drive(-0.58, 0.96, 0, 500);
-        robot.holonomic.runWithoutEncoder(-0.12*0.75,0.27*0.75,0);
-        while(colorSensorsAreNaN());
-        robot.holonomic.stop();
+        strafeUsingEncoder(-10.75, 19,0.7);
         sleep(800);
 
         obtainedHueLeft = ColorOperations.calculateHue(robot.leftColorSensor);
@@ -158,15 +205,10 @@ public class LeagueMeetAuto extends LinearOpMode {
         if (measuredHue < FieldSample.HUE_MAXIMUM_GOLD) {
             goldSamplePosition = Position.LEFT;
         } else {
-            robot.holonomic.runWithoutEncoder(0.6,-0.06,0);
-            sleep(500);
-            robot.holonomic.runWithoutEncoder(0.3,-0.02,0);
-            while(colorSensorsAreNaN());
-            robot.holonomic.stop();
-
+            strafeUsingEncoder(15,-1,0.4);
             obtainedHueLeft = ColorOperations.calculateHue(robot.leftColorSensor);
             obtainedHueRight = ColorOperations.calculateHue(robot.rightColorSensor);
-            measuredHue = obtainedHueLeft < obtainedHueRight ? obtainedHueLeft : obtainedHueRight; //get lowest read hue value of both sensors
+//            measuredHue = obtainedHueLeft < obtainedHueRight ? obtainedHueLeft : obtainedHueRight; //get lowest read hue value of both sensors
             telemetry.addData("left hue", obtainedHueLeft);
             telemetry.addData("right hue", obtainedHueRight);
             telemetry.addData("measured hue", measuredHue);
@@ -175,7 +217,7 @@ public class LeagueMeetAuto extends LinearOpMode {
                 goldSamplePosition = Position.CENTER;
             } else {
                 goldSamplePosition = Position.RIGHT;
-                drive(1,-0.20,0,750);
+                strafeUsingEncoder(18,-1,0.4);
             }
 
         }
@@ -224,4 +266,14 @@ public class LeagueMeetAuto extends LinearOpMode {
         secondsDelay = i_startDelay.getValue();
         land = i_land.getValue();
     }
+
+    private void strafeUsingEncoder(double x, double y, double power) {
+        robot.holonomic.runUsingEncoder(x, y, power);
+        while (opModeIsActive() & robot.holonomic.motorsAreBusy());
+    }
+    private void turnUsingEncoder(double degrees, double power) {
+        robot.holonomic.turnUsingEncoder(degrees,power);
+        while (opModeIsActive() & robot.holonomic.motorsAreBusy());
+    }
+
 }

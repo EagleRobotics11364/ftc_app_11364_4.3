@@ -15,14 +15,14 @@ public class Holonomic extends Drivetrain {
     private static final double WHEEL_CIRCUMFERENCE;
     private static final double TICKS_PER_REVOLUTION = 288;
     private static final double TICKS_PER_INCH;
-    private static final double DIAGONAL_BETWEEN_WHEELS = 21;
+    private static final double DIAGONAL_BETWEEN_WHEELS = Math.sqrt(2) * 16;
 
     private static final double ANGLE_LEFT_FRONT = 45 + 270;
     private static final double ANGLE_LEFT_REAR = 135 + 270;
     private static final double ANGLE_RIGHT_REAR = 225 + 270;
     private static final double ANGLE_RIGHT_FRONT = 315 + 270;
 
-    private static final int TARGET_POSITION_TOLERANCE = 5;
+    private static final int TARGET_POSITION_TOLERANCE = 15;
 
     static {
         WHEEL_CIRCUMFERENCE = (WHEEL_DIAMETER * Math.PI);
