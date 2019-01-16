@@ -78,28 +78,52 @@ public class LeagueMeetAuto extends LinearOpMode {
 
         switch (startingPosition) {
             case LEFT:                      // START LEFT POSITION
-                if (parkInCrater) {
-                    drive(0,0.5,0,800);
-                    robot.craterArm.setPosition(0);
-                    sleep(1000);
+                strafeUsingEncoder(0,7,0.6);
+                if (dropTeamMarker) {       // start left position -> DROP TEAM MARKER
+                    strafeUsingEncoder(0,-9,0.6);
+                    int baselineStrafe = -35;
+                    switch (goldSamplePosition) {
+                        case LEFT:          // start left position -> drop team marker -> LEFT SAMPLE POSITION
+                            // Our baseline position. Only strafe x = -20
+                            strafeUsingEncoder(baselineStrafe,0,0.9);
+                            break;
+                        case CENTER:        // start left position -> drop team marker -> CENTER SAMPLE POSITION
+                            // Strafe baseline along with -14.5 in.
+                            strafeUsingEncoder(baselineStrafe + -14.5,0,0.9);
+                            break;
+                        case RIGHT:         // start left position -> drop team marker -> RIGHT SAMPLE POSITION
+                            // Strafe baseline and center, along with -14.5 in.
+                            strafeUsingEncoder(baselineStrafe + -14.5 + -14.5,0, 0.9);
+                            break;
+                    }
+                    turnUsingEncoder(-45,0.7);
+                    strafeUsingEncoder(0,7,0.6);
+                    strafeUsingEncoder(-40,3.5,1);
+                    robot.teamMarkerServo.setPosition(0.10);
+                    sleep(200);
+                    strafeUsingEncoder(20,4,1);
+                    strafeUsingEncoder(70,5,1);
+
+                } else if (parkInCrater) { // start left position -> PARK IN CRATER
+                    strafeUsingEncoder(0,10,0.65);
                 }
                 break;
             case RIGHT:                     // START RIGHT POSITION
-                if (dropTeamMarker) {       // start right position - DROP TEAM MARKER
+                if (dropTeamMarker) {       // start right position -> DROP TEAM MARKER
                     switch (goldSamplePosition) {
-                        case LEFT:          // start right position - drop team marker - LEFT SAMPLE POSITION
+                        case LEFT:          // start right position -> drop team marker -> LEFT SAMPLE POSITION
                             strafeUsingEncoder(2,32,0.8);
                             strafeUsingEncoder(0,-5,0.5);
                             turnUsingEncoder(90,0.6);
                             strafeUsingEncoder(-10,0,0.6);
                             break;
-                        case CENTER:        // start right position - drop team marker - CENTER SAMPLE POSITION
+                        case CENTER:        // start right position -> drop team marker -> CENTER SAMPLE POSITION
                             strafeUsingEncoder(0,30,0.6);
                             turnUsingEncoder(45,0.6);
                             robot.teamMarkerServo.setPosition(0.10);
                             strafeUsingEncoder(-14,-14,0.8);
                             break;
-                        case RIGHT:         // start right position - drop team marker - RIGHT SAMPLE POSITION
+                        case RIGHT:         // start right position -> drop team marker -> RIGHT SAMPLE POSITION
                             strafeUsingEncoder(0,30,0.8);
                             turnUsingEncoder(45,0.6);
                             strafeUsingEncoder(-22,0,0.7);
@@ -112,19 +136,19 @@ public class LeagueMeetAuto extends LinearOpMode {
                     sleep(1000);
                     robot.teamMarkerServo.setPosition(0.10);
 
-                    if (parkInCrater) {     // start right position - drop team marker - PARK IN CRATER
+                    if (parkInCrater) {     // start right position -> drop team marker -> any sample position -> PARK IN CRATER
                         sleep(1000);
 
                         switch(goldSamplePosition) {
-                            case LEFT:      // start right position - drop team marker - park in crater - LEFT SAMPLE POSITION
+                            case LEFT:      // start right position -> drop team marker -> any sample position -> park in crater -> LEFT SAMPLE POSITION
                                 strafeUsingEncoder(10,-10,0.8);
                                 turnUsingEncoder(-45,0.7);
                                 strafeUsingEncoder(0,-62,1);
                                 break;
-                            case CENTER:    // start right position - drop team marker - park in crater - CENTER SAMPLE POSITION
+                            case CENTER:    // start right position -> drop team marker -> any sample position ->park in crater -> CENTER SAMPLE POSITION
                                 strafeUsingEncoder(0,-62,1);
                                 break;
-                            case RIGHT:     // start right position - drop team marker - park in crater - RIGHT SAMPLE POSITION
+                            case RIGHT:     // start right position -> drop team marker -> any sample position ->park in crater -> RIGHT SAMPLE POSITION
                                 strafeUsingEncoder(0,-62,1);
                                 break;
                         }
@@ -184,7 +208,7 @@ public class LeagueMeetAuto extends LinearOpMode {
             strafeUsingEncoder(15,-1,0.4);
             obtainedHueLeft = ColorOperations.calculateHue(robot.leftColorSensor);
             obtainedHueRight = ColorOperations.calculateHue(robot.rightColorSensor);
-            measuredHue = obtainedHueLeft < obtainedHueRight ? obtainedHueLeft : obtainedHueRight; //get lowest read hue value of both sensors
+//            measuredHue = obtainedHueLeft < obtainedHueRight ? obtainedHueLeft : obtainedHueRight; //get lowest read hue value of both sensors
             telemetry.addData("left hue", obtainedHueLeft);
             telemetry.addData("right hue", obtainedHueRight);
             telemetry.addData("measured hue", measuredHue);

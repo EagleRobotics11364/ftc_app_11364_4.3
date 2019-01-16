@@ -202,10 +202,11 @@ public class Holonomic extends Drivetrain {
         frontRightMotor.setPower(power);
         backLeftMotor.setPower(power);
         backRightMotor.setPower(power);
+        setMotorsMode(RUN_TO_POSITION);
     }
 
     public boolean motorsAreBusy() {
-        if (frontLeftMotor.isBusy() | frontLeftMotor.isBusy() | backLeftMotor.isBusy() | backRightMotor.isBusy())
+        if (frontLeftMotor.isBusy() & frontLeftMotor.isBusy() & backLeftMotor.isBusy() & backRightMotor.isBusy())
             return true;
         else return false;
     }
