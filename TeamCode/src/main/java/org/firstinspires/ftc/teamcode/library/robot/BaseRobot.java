@@ -22,6 +22,11 @@ public class BaseRobot {
     private DcMotor frontTapeMeasure;
     private DcMotor backTapeMeasure;
 
+    // Intake Variables
+    public DcMotor intakeArmMotor;
+    public Servo intakeBallServo;
+    public Servo intakeArmHoldServo;
+
     // Servo Variables
     public Servo teamMarkerServo;
     public Servo craterArm;
@@ -44,6 +49,10 @@ public class BaseRobot {
 
         frontTapeMeasure = hardwareMap.dcMotor.get("frontTapeMeasure");
         backTapeMeasure = hardwareMap.dcMotor.get("backTapeMeasure");
+
+        intakeArmMotor = hardwareMap.dcMotor.get("intakeArmMotor");
+        intakeBallServo = hardwareMap.servo.get("intakeBallServo");
+        intakeArmHoldServo = hardwareMap.servo.get("intakeArmHoldServo");
 
         teamMarkerServo = hardwareMap.servo.get("teamMarkerServo");
         craterArm = hardwareMap.servo.get("craterArm");

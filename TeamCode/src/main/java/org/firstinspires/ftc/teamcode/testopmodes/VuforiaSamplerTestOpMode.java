@@ -21,13 +21,15 @@ public class VuforiaSamplerTestOpMode extends LinearOpMode {
         }
         if (!isStopRequested() && opModeIsActive()) {
             try {
-                Position position = Position.NULL;
                 VuforiaTFODSampler sampler = new VuforiaTFODSampler(hardwareMap, telemetry);
                 sampler.activate();
                 sleep(2000);
-                position = sampler.recognize(viewingDirection);
-                telemetry.addData("Vuforia", position);
+                telemetry.setAutoClear(false);
+                VuforiaTFODSampler.SamplerResult result = sampler.recognizeUsingGoldLocation_viewRightPosition();
+                telemetry.addData("TFOD Position", result.position);
+                telemetry.addData("TFOD Confidence", result.confidence);
                 telemetry.update();
+
                 sampler.shutdown();
                 sleep(3000);
             } catch (VuforiaTFODSampler.UnsupportedHardwareException e) {
