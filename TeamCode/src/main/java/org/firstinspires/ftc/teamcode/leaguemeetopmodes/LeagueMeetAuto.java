@@ -3,18 +3,17 @@ package org.firstinspires.ftc.teamcode.leaguemeetopmodes;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.library.functions.ColorOperations;
 import org.firstinspires.ftc.teamcode.library.functions.Position;
 import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.IterableTelemetryMenu;
-import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.MenuItem;
 import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.MenuItemBoolean;
 import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.MenuItemEnum;
 import org.firstinspires.ftc.teamcode.library.functions.telemetrymenu.MenuItemInteger;
 import org.firstinspires.ftc.teamcode.library.robot.BaseRobot;
 import org.firstinspires.ftc.teamcode.library.sampling.FieldSample;
 import org.firstinspires.ftc.teamcode.library.sampling.SamplingMethod;
+import org.firstinspires.ftc.teamcode.library.sampling.TFODFilteringSampler;
 import org.firstinspires.ftc.teamcode.library.sampling.VuforiaTFODSampler;
 
 
@@ -51,6 +50,8 @@ public class LeagueMeetAuto extends LinearOpMode {
                 vuforiaTFODSampler = new VuforiaTFODSampler(hardwareMap, telemetry);
                 vuforiaTFODSampler.activate();
                 telemetry.addData("Vuforia", "Ready");
+                TFODFilteringSampler tensorFlowSampler = new TFODFilteringSampler();
+                tensorFlowSampler.recognizeGoldUsingTwoMinerals(Position.NULL);
             } catch (VuforiaTFODSampler.UnsupportedHardwareException e) {
                 samplingMethod = SamplingMethod.COLORSENSORS;
                 telemetry.addData("Vuforia", "Invalid Hardware!!!");
@@ -60,9 +61,9 @@ public class LeagueMeetAuto extends LinearOpMode {
 
         // land
         if (land) {
-            robot.dualTapeSpools.move(1);
+//            robot.dualTapeSpools.move(1);
             sleep(7000);
-            robot.dualTapeSpools.stop();
+//            robot.dualTapeSpools.stop();
             strafeUsingEncoder(-4.25,0,0.6);
         }
 

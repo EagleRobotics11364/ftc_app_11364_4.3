@@ -6,8 +6,8 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.library.robot.systems.DualTapeSpools;
 import org.firstinspires.ftc.teamcode.library.robot.systems.Holonomic;
+import org.firstinspires.ftc.teamcode.library.robot.systems.LiftingScrew;
 
 
 public class BaseRobot {
@@ -19,8 +19,7 @@ public class BaseRobot {
     public DcMotor backRightMotor;
 
     // Tape Measure Spool (DcMotor) Variables
-    private DcMotor frontTapeMeasure;
-    private DcMotor backTapeMeasure;
+    public DcMotor hangingScrew;
 
     // Intake Variables
     public DcMotor intakeArmMotor;
@@ -37,9 +36,10 @@ public class BaseRobot {
     public DistanceSensor leftDistanceSensor;
     public DistanceSensor rightDistanceSensor;
 
-    // BaseRobot Systems Variables
+    // Robot Systems Variables
     public Holonomic holonomic;
-    public DualTapeSpools dualTapeSpools;
+//    public LiftingScrew liftingScrew;
+//    public DualTapeSpools dualTapeSpools;
 
     public BaseRobot(HardwareMap hardwareMap) {
         frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
@@ -47,8 +47,7 @@ public class BaseRobot {
         frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
         backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
 
-        frontTapeMeasure = hardwareMap.dcMotor.get("frontTapeMeasure");
-        backTapeMeasure = hardwareMap.dcMotor.get("backTapeMeasure");
+        hangingScrew = hardwareMap.dcMotor.get("hangingScrew");
 
         intakeArmMotor = hardwareMap.dcMotor.get("intakeArmMotor");
         intakeBallServo = hardwareMap.servo.get("intakeBallServo");
@@ -64,7 +63,8 @@ public class BaseRobot {
         rightDistanceSensor = hardwareMap.get(DistanceSensor.class, "rightColorSensor");
 
         holonomic = new Holonomic(frontLeftMotor, backLeftMotor,frontRightMotor,backRightMotor);
-        dualTapeSpools = new DualTapeSpools(frontTapeMeasure, backTapeMeasure);
+//        rearLiftingScrews = new LiftingScrew(leftHangingScrew, rightHangingScrew);
+//        dualTapeSpools = new DualTapeSpools(leftHangingScrew, rightHangingScrew);
     }
 
 

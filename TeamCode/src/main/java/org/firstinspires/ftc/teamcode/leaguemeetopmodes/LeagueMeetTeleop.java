@@ -45,7 +45,7 @@ public class LeagueMeetTeleop extends OpMode {
          */
         if (!gamepad2.left_bumper) robot.intakeArmMotor.setPower(0);
         if(gamepad2.right_bumper) {
-            robot.dualTapeSpools.move(-gamepad2.left_stick_y, -gamepad2.right_stick_y);
+            robot.hangingScrew.setPower(-gamepad2.left_stick_y);
             if (gamepad2.left_bumper) robot.intakeArmMotor.setPower(-0.34);
         } else if (gamepad2.right_trigger>0.03) {
             robot.intakeArmHoldServo.setPosition(0.30);
@@ -66,11 +66,7 @@ public class LeagueMeetTeleop extends OpMode {
             telemetry.addData("final input", input);
             robot.intakeArmMotor.setPower(input);
         }
-        else if(gamepad2.dpad_up) {
-            robot.dualTapeSpools.move(1);
-        } else if(gamepad2.dpad_down) {
-            robot.dualTapeSpools.move(-1);
-        } else robot.dualTapeSpools.stop();
+        else robot.hangingScrew.setPower(0);
 
         if (gamepad2.x) {
             robot.intakeBallServo.setPosition(0.95);
