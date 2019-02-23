@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.library.sampling.TensorFlowSampler;
 
 
 @com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "State Autonomous", group = "LT")
-public class StateAuto extends LinearOpMode {
+public class StateAutonomous extends LinearOpMode {
 
     // robot, core systems variables
     private BaseRobot robot;
