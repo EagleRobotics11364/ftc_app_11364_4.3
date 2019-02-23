@@ -1,5 +1,5 @@
 package org.firstinspires.ftc.teamcode.library.sampling;
 
 public enum SamplingMethod {
-    COLORSENSORS, COMBINED, TENSORFLOW
+    COLORSENSORS, TFOD_SINGLE, TFOD_DUAL
 }

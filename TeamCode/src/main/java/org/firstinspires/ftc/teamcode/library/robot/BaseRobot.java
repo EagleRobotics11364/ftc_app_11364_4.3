@@ -19,12 +19,14 @@ public class BaseRobot {
     public DcMotor backRightMotor;
 
     // Tape Measure Spool (DcMotor) Variables
-    public DcMotor hangingScrew;
+    private DcMotor hangingScrewMotor;
 
     // Intake Variables
     public DcMotor intakeArmMotor;
+    public DcMotor intakeArmExtender;
+    public DcMotor mineralCollector;
     public Servo intakeBallServo;
-    public Servo intakeArmHoldServo;
+    public Servo intakeCubeServo;
 
     // Servo Variables
     public Servo teamMarkerServo;
@@ -38,7 +40,7 @@ public class BaseRobot {
 
     // Robot Systems Variables
     public Holonomic holonomic;
-//    public LiftingScrew liftingScrew;
+    public LiftingScrew hangingScrew;
 //    public DualTapeSpools dualTapeSpools;
 
     public BaseRobot(HardwareMap hardwareMap) {
@@ -47,11 +49,13 @@ public class BaseRobot {
         frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
         backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
 
-        hangingScrew = hardwareMap.dcMotor.get("hangingScrew");
+        hangingScrewMotor = hardwareMap.dcMotor.get("hangingScrew");
 
         intakeArmMotor = hardwareMap.dcMotor.get("intakeArmMotor");
+        intakeArmExtender = hardwareMap.dcMotor.get("intakeArmExtender");
+        mineralCollector = hardwareMap.dcMotor.get("mineralCollector");
         intakeBallServo = hardwareMap.servo.get("intakeBallServo");
-        intakeArmHoldServo = hardwareMap.servo.get("intakeArmHoldServo");
+        intakeCubeServo = hardwareMap.servo.get("intakeCubeServo");
 
         teamMarkerServo = hardwareMap.servo.get("teamMarkerServo");
         craterArm = hardwareMap.servo.get("craterArm");
@@ -63,6 +67,7 @@ public class BaseRobot {
         rightDistanceSensor = hardwareMap.get(DistanceSensor.class, "rightColorSensor");
 
         holonomic = new Holonomic(frontLeftMotor, backLeftMotor,frontRightMotor,backRightMotor);
+        hangingScrew = new LiftingScrew(hangingScrewMotor);
 //        rearLiftingScrews = new LiftingScrew(leftHangingScrew, rightHangingScrew);
 //        dualTapeSpools = new DualTapeSpools(leftHangingScrew, rightHangingScrew);
     }

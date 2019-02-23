@@ -14,17 +14,18 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-public class TFODFilteringSampler implements TensorFlowSampler {
+class TFODFilteringSampler implements TensorFlowSampler {
     private static final String VUFORIA_KEY = "AcMSLB//////AAAAGV2X9BmFFk6Pt9dw+Dg7oCSDbgmpvFL2uaQFUQNenTRFP8eywDy/1JH+6MeeMp/aHH3L2pWVW+t2hx9saq2n72eE+/6orS0hL6ooUobxBlvKS6YQqJIQM7ZOTOIVVpgpzVODNQVdcvRW6Vm2yGrRUAPnuEScnQU9ahY8PSApozJ05M8oS33fEP8T76Y8V31jWRqaw1JIsXQRKHzmQpK5l1no4LwBQ/iCxmHHJ3h77zlfKDsP9DQrh0r/r9b8dP7sSMtCQsukfrmwD4o5uF+S6e4ScWTA4tgpXkPMYVfyjVLsynvNHhi2kuzd2goDeP1uNgpSoEXzJQQKcNeo99nKm3BU22USUBPliFrocMRYGnxb";
     private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
     private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
     private static final Comparator<Recognition> largestWidthComparator;
     private static final Comparator<Recognition> leftmostComparator;
+    private static final Predicate<Recognition> squareFilter;
     private static final Predicate<Recognition> onlyGoldMinerals;
     private static final Predicate<Recognition> onlySilverMinerals;
     private double confidence;
-
+    private String output = "no output available";
     private VuforiaLocalizer vuforia;
     private TFObjectDetector tfod;
 
@@ -63,10 +64,16 @@ public class TFODFilteringSampler implements TensorFlowSampler {
     }
 
     @Override
+    public String getOutput() {
+        return output;
+    }
+
+    @Override
     public FieldSample recognizeOneMineral() {
+        output = "";
         confidence = 0.0;
         List<Recognition> tfodRecognitions = tfod.getUpdatedRecognitions();
-        List<Recognition> filteredRecognitions = sort(tfodRecognitions,largestWidthComparator);
+        List<Recognition> filteredRecognitions = sort(filter(tfodRecognitions, squareFilter),largestWidthComparator);
         try {
             Recognition largestRecognition = filteredRecognitions.get(0);
             confidence = largestRecognition.getConfidence();
@@ -75,7 +82,7 @@ public class TFODFilteringSampler implements TensorFlowSampler {
                 case LABEL_SILVER_MINERAL: return FieldSample.SILVER;
                 default: return FieldSample.NULL;
             }
-        } catch (ArrayIndexOutOfBoundsException | NullPointerException e) {
+        } catch (IndexOutOfBoundsException | NullPointerException e) {
             return FieldSample.NULL;
         }
     }
@@ -84,18 +91,20 @@ public class TFODFilteringSampler implements TensorFlowSampler {
     public Position recognizeGoldUsingTwoMinerals(Position cameraViewingDirection) throws IllegalArgumentException {
        if (cameraViewingDirection != Position.LEFT & cameraViewingDirection != Position.RIGHT) throw new IllegalArgumentException("Camera viewing direction left and right are only accepted");
         int interpretation = -1;
-       confidence = 0.0;
+       output = "Started two-mineral sampling...";
+        confidence = 0.0;
        List<Recognition> tfodRecognitions = tfod.getUpdatedRecognitions();
-       List<Recognition> leftHalfMinerals = sort(filter(tfodRecognitions, new Predicate<Recognition>() {
+       List<Recognition> squareMinerals = filter(tfodRecognitions, squareFilter);
+       List<Recognition> leftHalfMinerals = sort(filter(squareMinerals, new Predicate<Recognition>() {
            @Override
            public boolean test(Recognition recognition) {
                return recognition.getLeft() < recognition.getImageWidth() / 2;
            }
        }), largestWidthComparator);
-       List<Recognition> rightHalfMinerals = sort(filter(tfodRecognitions, new Predicate<Recognition>() {
+       List<Recognition> rightHalfMinerals = sort(filter(squareMinerals, new Predicate<Recognition>() {
            @Override
            public boolean test(Recognition recognition) {
-               return recognition.getLeft() > recognition.getImageWidth();
+               return recognition.getLeft() > recognition.getImageWidth() / 2;
            }
        }), largestWidthComparator);
        try {
@@ -107,26 +116,31 @@ public class TFODFilteringSampler implements TensorFlowSampler {
            else if (leftMineral.getLabel().equals(LABEL_GOLD_MINERAL) & rightMineral.getLabel().equals(LABEL_GOLD_MINERAL)) interpretation = 3;
            confidence = (leftMineral.getConfidence() + rightMineral.getConfidence()) / 2;
 
-       } catch (ArrayIndexOutOfBoundsException e) {
+       } catch (IndexOutOfBoundsException e) {
            e.printStackTrace();
+           output += "Error: IndexOutOfBoundsException!\n#left: "+leftHalfMinerals.size() + ";\n#right: "+rightHalfMinerals.size()+"\n";
        }
        switch (interpretation) {
            case 0: //left on camera
+               output += "gold on left of frame\n";
                switch (cameraViewingDirection) {
                    case LEFT: return Position.LEFT;
                    case RIGHT: return Position.CENTER;
                }
            case 1:
+               output += "gold on right of frame\n";
                switch (cameraViewingDirection) {
                    case LEFT: return Position.CENTER;
                    case RIGHT: return Position.RIGHT;
                }
            case 2: //both silver on camera
+               output += "found two silver\n";
                switch (cameraViewingDirection) {
                    case LEFT: return Position.RIGHT;
                    case RIGHT: return Position.LEFT;
                }
            default: //both gold on camera
+               output += "both gold or not a match";
                return Position.NULL;
        }
     }
@@ -135,8 +149,9 @@ public class TFODFilteringSampler implements TensorFlowSampler {
     public Position recognizeGoldUsingThreeMinerals() {
         confidence = 0.0;
         List<Recognition> tfodRecognitions = tfod.getUpdatedRecognitions();
-        List<Recognition> goldSorted = sort(filter(tfodRecognitions,onlyGoldMinerals), largestWidthComparator);
-        List<Recognition> silverSorted = sort(filter(tfodRecognitions,onlySilverMinerals), largestWidthComparator);
+        List<Recognition> squareMinerals = filter(tfodRecognitions, squareFilter);
+        List<Recognition> goldSorted = sort(filter(squareMinerals,onlyGoldMinerals), largestWidthComparator);
+        List<Recognition> silverSorted = sort(filter(squareMinerals,onlySilverMinerals), largestWidthComparator);
         try {
             List<Recognition> threeRecognitions = sort(Arrays.asList(goldSorted.get(0),silverSorted.get(0), silverSorted.get(1)), leftmostComparator);
             confidence = (threeRecognitions.get(0).getConfidence() + threeRecognitions.get(1).getConfidence() + threeRecognitions.get(2).getConfidence()) / 3;
@@ -145,7 +160,7 @@ public class TFODFilteringSampler implements TensorFlowSampler {
                 case 1: return Position.CENTER;
                 case 2: return Position.RIGHT;
             }
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException e) {
             return Position.NULL;
         }
         return Position.NULL;
@@ -156,9 +171,9 @@ public class TFODFilteringSampler implements TensorFlowSampler {
     }
 
     private List<Recognition> filter(List<Recognition> recognitions, Predicate<Recognition> filter) {
-        List<Recognition> newList = new ArrayList<>(recognitions);
-        for (Recognition recognition : newList) {
-            if (!filter.test(recognition)) newList.remove(recognition);
+        List<Recognition> newList = new ArrayList<>();
+        for (Recognition recognition : recognitions) {
+            if (filter.test(recognition)) newList.add(recognition);
         }
         return newList;
     }
@@ -187,7 +202,7 @@ public class TFODFilteringSampler implements TensorFlowSampler {
         largestWidthComparator = new Comparator<Recognition>() {
             @Override
             public int compare(Recognition lhs, Recognition rhs) {
-                return -Float.compare(lhs.getWidth(),rhs.getWidth());
+                return Float.compare(lhs.getWidth(),rhs.getWidth());
             }
         };
         leftmostComparator = new Comparator<Recognition>() {
@@ -206,6 +221,24 @@ public class TFODFilteringSampler implements TensorFlowSampler {
             @Override
             public boolean test(Recognition recognition) {
                 return recognition.getLabel().equals(LABEL_SILVER_MINERAL);
+            }
+        };
+        squareFilter = new Predicate<Recognition>() {
+            @Override
+            public boolean test(Recognition recognition) {
+                float top = recognition.getTop();
+                float bottom = recognition.getBottom();
+                float height;
+                float left = recognition.getLeft();
+                float right = recognition.getRight();
+                float width;
+
+                if (top > bottom) height = top - bottom;
+                else height = bottom - top;
+                if (left > right) width = left - right;
+                else width = right - left;
+                if (width / height < 1.5 & width / height > 0.5) return true;
+                else return false;
             }
         };
     }

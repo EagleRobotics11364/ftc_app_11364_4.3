@@ -1,9 +1,13 @@
 package org.firstinspires.ftc.teamcode.library.sampling;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.library.functions.Position;
 
+import java.util.ConcurrentModificationException;
+
+@TeleOp(name="New Sampler Test", group="Test")
 public class SamplingTestOpMode extends OpMode {
     TensorFlowSampler tfod;
     int i = 0;

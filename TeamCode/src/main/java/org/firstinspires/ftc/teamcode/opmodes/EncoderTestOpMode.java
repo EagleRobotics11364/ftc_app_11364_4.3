@@ -1,9 +1,8 @@
-package org.firstinspires.ftc.teamcode.leaguemeetopmodes;
+package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.library.robot.BaseRobot;
 
 @Autonomous(name="Encoder Test OpMode", group = "Test")

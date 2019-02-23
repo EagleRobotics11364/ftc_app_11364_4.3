@@ -15,6 +15,8 @@ public interface TensorFlowSampler {
 
     boolean deactivate();
 
+    String getOutput();
+
     class SamplingException extends Exception {
         public SamplingException() {
             super();
@@ -30,7 +32,7 @@ public interface TensorFlowSampler {
     }
 
     class Factory {
-        static TensorFlowSampler newSampler(HardwareMap hardwareMap) throws UnsupportedHardwareException {
+        public static TensorFlowSampler newSampler(HardwareMap hardwareMap) throws UnsupportedHardwareException {
             return new TFODFilteringSampler(hardwareMap);
         }
         private Factory() {}
