@@ -48,7 +48,7 @@ public class StateTeleop extends OpMode {
         if (gamepad2.right_bumper) { // do hanging
             if (gamepad2.dpad_up) robot.hangingScrew.up();
             else if (gamepad2.dpad_down) robot.hangingScrew.halfDown();
-            else robot.hangingScrew.manualControl(-gamepad2.left_stick_y);
+            else robot.hangingScrew.manualControl(-gamepad2.right_stick_y);
         } else {
             robot.hangingScrew.stop();
             robot.intakeCubeServo.setPosition(gamepad2.right_trigger * 0.35);
