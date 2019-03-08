@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.library.robot.systems.DualTapeSpools;
 import org.firstinspires.ftc.teamcode.library.robot.systems.Holonomic;
+import org.firstinspires.ftc.teamcode.library.robot.systems.LiftingScrew;
 
 
 public class BaseRobot {
@@ -20,8 +20,14 @@ public class BaseRobot {
     public DcMotor backRightMotor;
 
     // Tape Measure Spool (DcMotor) Variables
-    private DcMotor frontTapeMeasure;
-    private DcMotor backTapeMeasure;
+    private DcMotor hangingScrewMotor;
+
+    // Intake Variables
+    public DcMotor intakeArmMotor;
+    public DcMotor intakeArmExtender;
+    public DcMotor mineralCollector;
+    public Servo intakeBallServo;
+    public Servo intakeCubeServo;
 
     // Servo Variables
     public Servo teamMarkerServo;
@@ -33,9 +39,10 @@ public class BaseRobot {
     public DistanceSensor leftDistanceSensor;
     public DistanceSensor rightDistanceSensor;
 
-    // BaseRobot Systems Variables
+    // Robot Systems Variables
     public Holonomic holonomic;
-    public DualTapeSpools dualTapeSpools;
+    public LiftingScrew hangingScrew;
+//    public DualTapeSpools dualTapeSpools;
 
 //    public BNO055IMU imuA;
 //    public BNO055IMU imuB;
@@ -46,8 +53,13 @@ public class BaseRobot {
         frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
         backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
 
-        frontTapeMeasure = hardwareMap.dcMotor.get("frontTapeMeasure");
-        backTapeMeasure = hardwareMap.dcMotor.get("backTapeMeasure");
+        hangingScrewMotor = hardwareMap.dcMotor.get("hangingScrew");
+
+        intakeArmMotor = hardwareMap.dcMotor.get("intakeArmMotor");
+        intakeArmExtender = hardwareMap.dcMotor.get("intakeArmExtender");
+        mineralCollector = hardwareMap.dcMotor.get("mineralCollector");
+        intakeBallServo = hardwareMap.servo.get("intakeBallServo");
+        intakeCubeServo = hardwareMap.servo.get("intakeCubeServo");
 
         teamMarkerServo = hardwareMap.servo.get("teamMarkerServo");
         craterArm = hardwareMap.servo.get("craterArm");
@@ -62,7 +74,9 @@ public class BaseRobot {
 //        imuB = hardwareMap.get(BNO055IMU.class, "imuB");
 
         holonomic = new Holonomic(frontLeftMotor, backLeftMotor,frontRightMotor,backRightMotor);
-        dualTapeSpools = new DualTapeSpools(frontTapeMeasure, backTapeMeasure);
+        hangingScrew = new LiftingScrew(hangingScrewMotor);
+//        rearLiftingScrews = new LiftingScrew(leftHangingScrew, rightHangingScrew);
+//        dualTapeSpools = new DualTapeSpools(leftHangingScrew, rightHangingScrew);
     }
 
 

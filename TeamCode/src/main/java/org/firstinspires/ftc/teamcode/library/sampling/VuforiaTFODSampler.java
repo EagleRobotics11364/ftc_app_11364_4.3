@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.vuforia.CameraDevice;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.Predicate;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.library.functions.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
@@ -58,7 +59,7 @@ public class VuforiaTFODSampler {
     public void activate() {
         if (tfod != null) {
             tfod.activate();
-            CameraDevice.getInstance().setFlashTorchMode(true);
+            CameraDevice.getInstance().setFlashTorchMode(false);
         }
         else throw new NullPointerException();
     }
@@ -241,6 +242,61 @@ public class VuforiaTFODSampler {
         return finalRecognitions;
     }
 
+    private List<Recognition> filter(List<Recognition> recognitions, Predicate<Recognition> filterClause) {
+        List<Recognition> filteredRecognitions = new ArrayList<>();
+        for (Recognition recognition : recognitions) {
+            if (filterClause.test(recognition)) filteredRecognitions.add(recognition);
+        }
+        return filteredRecognitions;
+    }
+
+    public SamplerResult recognizeUsingGoldLocation_viewRightPosition() {
+        Position goldSamplePosition = Position.NULL;
+        double finalConfidenceMeasure = 0.0;
+        List<Recognition> recognitions = tfod.getUpdatedRecognitions();
+        List<Recognition> filteredRecognitions = filter(recognitions, new Predicate<Recognition>() {
+            @Override
+            public boolean test(Recognition recognition) {
+                return recognition.getHeight() > 80 &
+                        recognition.getWidth() > 80;
+            }
+        });
+        telemetry.addData("Filtered recognitions", filteredRecognitions.size());
+        try {
+            List<Recognition> goldRecognitionList = getSpecifiedRecognitionsOfLargestWidth(filteredRecognitions, 1, FieldSample.GOLD);
+            Recognition goldRecognition = goldRecognitionList.get(0);
+            telemetry.addLine("Found single gold recognition");
+            if (goldRecognition.getLeft() < 200) goldSamplePosition = Position.CENTER;
+            else goldSamplePosition = Position.RIGHT;
+            telemetry.addData("Gold recognition position", goldSamplePosition);
+            finalConfidenceMeasure = goldRecognition.getConfidence();
+        } catch (NotEnoughRecognitionsException e) {
+            telemetry.addLine("Threw notEnoughRecognitionsException");
+            telemetry.addLine("Gold sample = left position");
+            goldSamplePosition = Position.LEFT;
+            try {
+                List<Recognition> silverRecognitionList = getSpecifiedRecognitionsOfLargestWidth(filteredRecognitions, 2, FieldSample.SILVER);
+                finalConfidenceMeasure = (silverRecognitionList.get(0).getConfidence() + silverRecognitionList.get(1).getConfidence()) / 2;
+                telemetry.addLine("Found two silver recognitions");
+            } catch (NotEnoughRecognitionsException ee) {
+                telemetry.addLine("Did not find two silver recognitions");
+                try {
+                    List<Recognition> silverRecognitionList = getSpecifiedRecognitionsOfLargestWidth(filteredRecognitions, 1, FieldSample.SILVER);
+                    finalConfidenceMeasure = Math.pow(silverRecognitionList.get(0).getConfidence(),2);
+                    telemetry.addLine("Found one silver recognition");
+                } catch (NotEnoughRecognitionsException eee) {
+                    goldSamplePosition = Position.NULL;
+                    telemetry.addLine("Did not find any recognitions");
+                    telemetry.addLine("Will return null");
+                }
+            }
+
+        }
+        telemetry.addData("return confidence", finalConfidenceMeasure);
+        telemetry.addData("return position", goldSamplePosition);
+        return new SamplerResult(goldSamplePosition,finalConfidenceMeasure);
+    }
+
     public class VuforiaTFODException extends Exception {
         public VuforiaTFODException() {
             super();
@@ -257,4 +313,15 @@ public class VuforiaTFODSampler {
             super("List contains "+listSize+ " recognitions; needed "+neededRecognitionQuantity);
         }
     }
+
+    public class SamplerResult {
+        public Position position;
+        public double confidence;
+
+        public SamplerResult(Position position, double confidence) {
+            this.position = position;
+            this.confidence = confidence;
+        }
+    }
+
 }
