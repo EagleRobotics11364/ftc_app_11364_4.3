@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.Predicate;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
@@ -15,11 +16,11 @@ import java.util.Comparator;
 import java.util.List;
 
 class TFODFilteringSampler implements TensorFlowSampler {
-    private static final String VUFORIA_KEY = "AcMSLB//////AAAAGV2X9BmFFk6Pt9dw+Dg7oCSDbgmpvFL2uaQFUQNenTRFP8eywDy/1JH+6MeeMp/aHH3L2pWVW+t2hx9saq2n72eE+/6orS0hL6ooUobxBlvKS6YQqJIQM7ZOTOIVVpgpzVODNQVdcvRW6Vm2yGrRUAPnuEScnQU9ahY8PSApozJ05M8oS33fEP8T76Y8V31jWRqaw1JIsXQRKHzmQpK5l1no4LwBQ/iCxmHHJ3h77zlfKDsP9DQrh0r/r9b8dP7sSMtCQsukfrmwD4o5uF+S6e4ScWTA4tgpXkPMYVfyjVLsynvNHhi2kuzd2goDeP1uNgpSoEXzJQQKcNeo99nKm3BU22USUBPliFrocMRYGnxb";
     private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
     private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
     private static final Comparator<Recognition> largestWidthComparator;
+    private static final String VUFORIA_KEY = "AVsEI0//////AAABmfbnDsRuiEqQsFcH7Lyqo3QuISqpJopGJxX15CNQ6JRwa6IhhZMdS346pkBRyp94aOkulPOzR+MQZ84lQbPclj/UW9I95nliTUyCT+Ie8Bw9qNN5X5Cv4sBkIAyNJpUXfxMjUf/5Hw098czCJ1HTiVoqUVB+AGNgZ6tLD4AGqbv/ftucrrA/nnzT045vPyCZCKujFStiBc1Hkab9Y96FE5wHPrfBeCrq8nYd0T+mB3eaCO3kUahLaqyjhFAyQnQCpa1oOzsqbDARsc5FuIcACzdzOFSG+LAEOj+Bgb7Nm+jJQHn8rYsCJi94aoSptfsgXSR0N2pTwhM3eQZEf9g6m1fbUJH18eCFJWwS1FVr3U+6";
     private static final Comparator<Recognition> leftmostComparator;
     private static final Predicate<Recognition> squareFilter;
     private static final Predicate<Recognition> onlyGoldMinerals;
@@ -36,7 +37,7 @@ class TFODFilteringSampler implements TensorFlowSampler {
         // init vuforia
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
-        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
 
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
 
@@ -73,18 +74,20 @@ class TFODFilteringSampler implements TensorFlowSampler {
         output = "";
         confidence = 0.0;
         List<Recognition> tfodRecognitions = tfod.getUpdatedRecognitions();
-        List<Recognition> filteredRecognitions = sort(filter(tfodRecognitions, squareFilter),largestWidthComparator);
-        try {
-            Recognition largestRecognition = filteredRecognitions.get(0);
-            confidence = largestRecognition.getConfidence();
-            switch (largestRecognition.getLabel()) {
-                case LABEL_GOLD_MINERAL: return FieldSample.GOLD;
-                case LABEL_SILVER_MINERAL: return FieldSample.SILVER;
-                default: return FieldSample.NULL;
+        if (tfodRecognitions != null) {
+            List<Recognition> filteredRecognitions = sort(filter(tfodRecognitions, squareFilter),largestWidthComparator);
+            try {
+                Recognition largestRecognition = filteredRecognitions.get(0);
+                confidence = largestRecognition.getConfidence();
+                switch (largestRecognition.getLabel()) {
+                    case LABEL_GOLD_MINERAL: return FieldSample.GOLD;
+                    case LABEL_SILVER_MINERAL: return FieldSample.SILVER;
+                    default: return FieldSample.NULL;
+                }
+            } catch (IndexOutOfBoundsException | NullPointerException e) {
+                return FieldSample.NULL;
             }
-        } catch (IndexOutOfBoundsException | NullPointerException e) {
-            return FieldSample.NULL;
-        }
+        } else return FieldSample.NULL;
     }
 
     @Override
@@ -94,76 +97,80 @@ class TFODFilteringSampler implements TensorFlowSampler {
        output = "Started two-mineral sampling...";
         confidence = 0.0;
        List<Recognition> tfodRecognitions = tfod.getUpdatedRecognitions();
-       List<Recognition> squareMinerals = filter(tfodRecognitions, squareFilter);
-       List<Recognition> leftHalfMinerals = sort(filter(squareMinerals, new Predicate<Recognition>() {
-           @Override
-           public boolean test(Recognition recognition) {
-               return recognition.getLeft() < recognition.getImageWidth() / 2;
-           }
-       }), largestWidthComparator);
-       List<Recognition> rightHalfMinerals = sort(filter(squareMinerals, new Predicate<Recognition>() {
-           @Override
-           public boolean test(Recognition recognition) {
-               return recognition.getLeft() > recognition.getImageWidth() / 2;
-           }
-       }), largestWidthComparator);
-       try {
-           Recognition leftMineral = leftHalfMinerals.get(0);
-           Recognition rightMineral = rightHalfMinerals.get(0);
-           if (leftMineral.getLabel().equals(LABEL_GOLD_MINERAL) & rightMineral.getLabel().equals(LABEL_SILVER_MINERAL)) interpretation = 0;
-           else if (leftMineral.getLabel().equals(LABEL_SILVER_MINERAL) & rightMineral.getLabel().equals(LABEL_GOLD_MINERAL)) interpretation = 1;
-           else if (leftMineral.getLabel().equals(LABEL_SILVER_MINERAL) & rightMineral.getLabel().equals(LABEL_SILVER_MINERAL)) interpretation = 2;
-           else if (leftMineral.getLabel().equals(LABEL_GOLD_MINERAL) & rightMineral.getLabel().equals(LABEL_GOLD_MINERAL)) interpretation = 3;
-           confidence = (leftMineral.getConfidence() + rightMineral.getConfidence()) / 2;
+        if (tfodRecognitions != null) {
+            List<Recognition> squareMinerals = filter(tfodRecognitions, squareFilter);
+            List<Recognition> leftHalfMinerals = sort(filter(squareMinerals, new Predicate<Recognition>() {
+                @Override
+                public boolean test(Recognition recognition) {
+                    return recognition.getLeft() < recognition.getImageWidth() / 2;
+                }
+            }), largestWidthComparator);
+            List<Recognition> rightHalfMinerals = sort(filter(squareMinerals, new Predicate<Recognition>() {
+                @Override
+                public boolean test(Recognition recognition) {
+                    return recognition.getLeft() > recognition.getImageWidth() / 2;
+                }
+            }), largestWidthComparator);
+            try {
+                Recognition leftMineral = leftHalfMinerals.get(0);
+                Recognition rightMineral = rightHalfMinerals.get(0);
+                if (leftMineral.getLabel().equals(LABEL_GOLD_MINERAL) & rightMineral.getLabel().equals(LABEL_SILVER_MINERAL)) interpretation = 0;
+                else if (leftMineral.getLabel().equals(LABEL_SILVER_MINERAL) & rightMineral.getLabel().equals(LABEL_GOLD_MINERAL)) interpretation = 1;
+                else if (leftMineral.getLabel().equals(LABEL_SILVER_MINERAL) & rightMineral.getLabel().equals(LABEL_SILVER_MINERAL)) interpretation = 2;
+                else if (leftMineral.getLabel().equals(LABEL_GOLD_MINERAL) & rightMineral.getLabel().equals(LABEL_GOLD_MINERAL)) interpretation = 3;
+                confidence = (leftMineral.getConfidence() + rightMineral.getConfidence()) / 2;
 
-       } catch (IndexOutOfBoundsException e) {
-           e.printStackTrace();
-           output += "Error: IndexOutOfBoundsException!\n#left: "+leftHalfMinerals.size() + ";\n#right: "+rightHalfMinerals.size()+"\n";
-       }
-       switch (interpretation) {
-           case 0: //left on camera
-               output += "gold on left of frame\n";
-               switch (cameraViewingDirection) {
-                   case LEFT: return Position.LEFT;
-                   case RIGHT: return Position.CENTER;
-               }
-           case 1:
-               output += "gold on right of frame\n";
-               switch (cameraViewingDirection) {
-                   case LEFT: return Position.CENTER;
-                   case RIGHT: return Position.RIGHT;
-               }
-           case 2: //both silver on camera
-               output += "found two silver\n";
-               switch (cameraViewingDirection) {
-                   case LEFT: return Position.RIGHT;
-                   case RIGHT: return Position.LEFT;
-               }
-           default: //both gold on camera
-               output += "both gold or not a match";
-               return Position.NULL;
-       }
+            } catch (IndexOutOfBoundsException e) {
+                e.printStackTrace();
+                output += "Error: IndexOutOfBoundsException!\n#left: "+leftHalfMinerals.size() + ";\n#right: "+rightHalfMinerals.size()+"\n";
+            }
+            switch (interpretation) {
+                case 0: //left on camera
+                    output += "gold on left of frame\n";
+                    switch (cameraViewingDirection) {
+                        case LEFT: return Position.LEFT;
+                        case RIGHT: return Position.CENTER;
+                    }
+                case 1:
+                    output += "gold on right of frame\n";
+                    switch (cameraViewingDirection) {
+                        case LEFT: return Position.CENTER;
+                        case RIGHT: return Position.RIGHT;
+                    }
+                case 2: //both silver on camera
+                    output += "found two silver\n";
+                    switch (cameraViewingDirection) {
+                        case LEFT: return Position.RIGHT;
+                        case RIGHT: return Position.LEFT;
+                    }
+                default: //both gold on camera
+                    output += "both gold or not a match";
+                    return Position.NULL;
+            }
+        } else return Position.NULL;
     }
 
     @Override
     public Position recognizeGoldUsingThreeMinerals() {
         confidence = 0.0;
         List<Recognition> tfodRecognitions = tfod.getUpdatedRecognitions();
-        List<Recognition> squareMinerals = filter(tfodRecognitions, squareFilter);
-        List<Recognition> goldSorted = sort(filter(squareMinerals,onlyGoldMinerals), largestWidthComparator);
-        List<Recognition> silverSorted = sort(filter(squareMinerals,onlySilverMinerals), largestWidthComparator);
-        try {
-            List<Recognition> threeRecognitions = sort(Arrays.asList(goldSorted.get(0),silverSorted.get(0), silverSorted.get(1)), leftmostComparator);
-            confidence = (threeRecognitions.get(0).getConfidence() + threeRecognitions.get(1).getConfidence() + threeRecognitions.get(2).getConfidence()) / 3;
-            switch (threeRecognitions.indexOf(goldSorted.get(0))) {
-                case 0: return Position.LEFT;
-                case 1: return Position.CENTER;
-                case 2: return Position.RIGHT;
+        if (tfodRecognitions != null) {
+            List<Recognition> squareMinerals = filter(tfodRecognitions, squareFilter);
+            List<Recognition> goldSorted = sort(filter(squareMinerals,onlyGoldMinerals), largestWidthComparator);
+            List<Recognition> silverSorted = sort(filter(squareMinerals,onlySilverMinerals), largestWidthComparator);
+            try {
+                List<Recognition> threeRecognitions = sort(Arrays.asList(goldSorted.get(0),silverSorted.get(0), silverSorted.get(1)), leftmostComparator);
+                confidence = (threeRecognitions.get(0).getConfidence() + threeRecognitions.get(1).getConfidence() + threeRecognitions.get(2).getConfidence()) / 3;
+                switch (threeRecognitions.indexOf(goldSorted.get(0))) {
+                    case 0: return Position.LEFT;
+                    case 1: return Position.CENTER;
+                    case 2: return Position.RIGHT;
+                }
+            } catch (IndexOutOfBoundsException e) {
+                return Position.NULL;
             }
-        } catch (IndexOutOfBoundsException e) {
             return Position.NULL;
-        }
-        return Position.NULL;
+        } else return Position.NULL;
     }
 
     public double getConfidenceOutput() {
@@ -172,8 +179,10 @@ class TFODFilteringSampler implements TensorFlowSampler {
 
     private List<Recognition> filter(List<Recognition> recognitions, Predicate<Recognition> filter) {
         List<Recognition> newList = new ArrayList<>();
-        for (Recognition recognition : recognitions) {
-            if (filter.test(recognition)) newList.add(recognition);
+        if (!recognitions.isEmpty()) {
+            for (Recognition recognition : recognitions) {
+                if (filter.test(recognition)) newList.add(recognition);
+            }
         }
         return newList;
     }

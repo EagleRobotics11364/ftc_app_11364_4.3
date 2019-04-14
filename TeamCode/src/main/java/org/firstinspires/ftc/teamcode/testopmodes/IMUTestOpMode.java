@@ -55,7 +55,7 @@ import java.util.Locale;
  * @see <a href="http://www.adafruit.com/products/2472">Adafruit IMU</a>
  */
 @TeleOp(name = "Sensor: BNO055 IMU", group = "Test")
-//@Disabled                            // Comment this out to add to the opmode list
+@Disabled                            // Comment this out to add to the opmode list
 public class IMUTestOpMode extends LinearOpMode
     {
     //----------------------------------------------------------------------------------------------
@@ -63,11 +63,14 @@ public class IMUTestOpMode extends LinearOpMode
     //----------------------------------------------------------------------------------------------
 
     // The IMU sensor object
-    BNO055IMU imu;
+    BNO055IMU imuA;
+    BNO055IMU imuB;
 
     // State used for updating telemetry
-    Orientation angles;
-    Acceleration gravity;
+    Orientation anglesA;
+    Acceleration gravityA;
+    Orientation anglesB;
+    Acceleration gravityB;
 
     //----------------------------------------------------------------------------------------------
     // Main logic
@@ -88,10 +91,13 @@ public class IMUTestOpMode extends LinearOpMode
 
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
-        // and named "imu".
-        imu = hardwareMap.get(BNO055IMU.class, "imuA");
-        imu.initialize(parameters);
+        // and named "imuA".
+        imuA = hardwareMap.get(BNO055IMU.class, "imuA");
+        imuA.initialize(parameters);
 
+        parameters.calibrationDataFile = "IMU_B_CalibrationData.json";
+        imuB = hardwareMap.get(BNO055IMU.class, "imuB");
+        imuB.initialize(parameters);
         // Set up our telemetry dashboard
         composeTelemetry();
 
@@ -99,7 +105,8 @@ public class IMUTestOpMode extends LinearOpMode
         waitForStart();
 
         // Start the logging of measured acceleration
-        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        imuA.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+        imuB.startAccelerationIntegration(new Position(), new Velocity(), 1000);
 
         // Loop and update the dashboard
         while (opModeIsActive()) {
@@ -117,55 +124,102 @@ public class IMUTestOpMode extends LinearOpMode
         // from the IMU that we will then display in separate lines.
         telemetry.addAction(new Runnable() { @Override public void run()
                 {
-                // Acquiring the angles is relatively expensive; we don't want
+                // Acquiring the anglesA is relatively expensive; we don't want
                 // to do that in each of the three items that need that info, as that's
                 // three times the necessary expense.
-                angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-                gravity  = imu.getGravity();
+                anglesA = imuA.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                gravityA = imuA.getGravity();
+                anglesB = imuB.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+                gravityB = imuB.getGravity();
+
                 }
             });
 
         telemetry.addLine()
-            .addData("status", new Func<String>() {
-                @Override public String value() {
-                    return imu.getSystemStatus().toShortString();
+                .addData("statusA", new Func<String>() {
+                    @Override public String value() {
+                        return imuA.getSystemStatus().toShortString();
                     }
                 })
-            .addData("calib", new Func<String>() {
-                @Override public String value() {
-                    return imu.getCalibrationStatus().toString();
+                .addData("calibA", new Func<String>() {
+                    @Override public String value() {
+                        return imuA.getCalibrationStatus().toString();
                     }
                 });
 
         telemetry.addLine()
-            .addData("heading", new Func<String>() {
-                @Override public String value() {
-                    return formatAngle(angles.angleUnit, angles.firstAngle);
+                .addData("headingA", new Func<String>() {
+                    @Override public String value() {
+                        return formatAngle(anglesA.angleUnit, anglesA.firstAngle);
                     }
                 })
-            .addData("roll", new Func<String>() {
-                @Override public String value() {
-                    return formatAngle(angles.angleUnit, angles.secondAngle);
+                .addData("rollA", new Func<String>() {
+                    @Override public String value() {
+                        return formatAngle(anglesA.angleUnit, anglesA.secondAngle);
                     }
                 })
-            .addData("pitch", new Func<String>() {
-                @Override public String value() {
-                    return formatAngle(angles.angleUnit, angles.thirdAngle);
+                .addData("pitchA", new Func<String>() {
+                    @Override public String value() {
+                        return formatAngle(anglesA.angleUnit, anglesA.thirdAngle);
                     }
                 });
 
         telemetry.addLine()
-            .addData("grvty", new Func<String>() {
-                @Override public String value() {
-                    return gravity.toString();
+                .addData("grvtyA", new Func<String>() {
+                    @Override public String value() {
+                        return gravityA.toString();
                     }
                 })
-            .addData("mag", new Func<String>() {
-                @Override public String value() {
-                    return String.format(Locale.getDefault(), "%.3f",
-                            Math.sqrt(gravity.xAccel*gravity.xAccel
-                                    + gravity.yAccel*gravity.yAccel
-                                    + gravity.zAccel*gravity.zAccel));
+                .addData("magA", new Func<String>() {
+                    @Override public String value() {
+                        return String.format(Locale.getDefault(), "%.3f",
+                                Math.sqrt(gravityA.xAccel* gravityA.xAccel
+                                        + gravityA.yAccel* gravityA.yAccel
+                                        + gravityA.zAccel* gravityA.zAccel));
+                    }
+                });
+        // ---------------------
+        telemetry.addLine()
+                .addData("statusB", new Func<String>() {
+                    @Override public String value() {
+                        return imuB.getSystemStatus().toShortString();
+                    }
+                })
+                .addData("calibB", new Func<String>() {
+                    @Override public String value() {
+                        return imuB.getCalibrationStatus().toString();
+                    }
+                });
+
+        telemetry.addLine()
+                .addData("headingB", new Func<String>() {
+                    @Override public String value() {
+                        return formatAngle(anglesB.angleUnit, anglesB.firstAngle);
+                    }
+                })
+                .addData("rollB", new Func<String>() {
+                    @Override public String value() {
+                        return formatAngle(anglesB.angleUnit, anglesB.secondAngle);
+                    }
+                })
+                .addData("pitchB", new Func<String>() {
+                    @Override public String value() {
+                        return formatAngle(anglesB.angleUnit, anglesB.thirdAngle);
+                    }
+                });
+
+        telemetry.addLine()
+                .addData("grvtyB", new Func<String>() {
+                    @Override public String value() {
+                        return gravityB.toString();
+                    }
+                })
+                .addData("magB", new Func<String>() {
+                    @Override public String value() {
+                        return String.format(Locale.getDefault(), "%.3f",
+                                Math.sqrt(gravityB.xAccel* gravityB.xAccel
+                                        + gravityB.yAccel* gravityB.yAccel
+                                        + gravityB.zAccel* gravityB.zAccel));
                     }
                 });
     }

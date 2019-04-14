@@ -40,7 +40,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Demonstrates empty OpMode
  */
 @TeleOp(name = "Basic Motor Test", group = "Test")
-//@Disabled
+@Disabled
 public class BasicMotorTest extends OpMode {
 
     private ElapsedTime runtime = new ElapsedTime();

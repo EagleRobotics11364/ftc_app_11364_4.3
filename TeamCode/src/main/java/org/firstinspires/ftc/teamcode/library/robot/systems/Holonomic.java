@@ -15,12 +15,12 @@ public class Holonomic extends Drivetrain {
     private static final double WHEEL_CIRCUMFERENCE;
     private static final double TICKS_PER_REVOLUTION = 288;
     private static final double TICKS_PER_INCH;
-    private static final double DIAGONAL_BETWEEN_WHEELS = Math.sqrt(2) * 16;
+    private static final double DIAGONAL_BETWEEN_WHEELS = Math.sqrt(2) * 14.5;
 
-    private static final double ANGLE_LEFT_FRONT = 45 + 270;
-    private static final double ANGLE_LEFT_REAR = 135 + 270;
-    private static final double ANGLE_RIGHT_REAR = 225 + 270;
-    private static final double ANGLE_RIGHT_FRONT = 315 + 270;
+    private static final double ANGLE_LEFT_FRONT = 315;
+    private static final double ANGLE_LEFT_REAR = 45;
+    private static final double ANGLE_RIGHT_REAR = 135;
+    private static final double ANGLE_RIGHT_FRONT = 225;
 
     private static final int TARGET_POSITION_TOLERANCE = 15;
 
@@ -63,66 +63,14 @@ public class Holonomic extends Drivetrain {
         run(x, y, z);
     }
 
-    public void runUsingEncoderOld(double x, double y, float power) {
-        double relativeAngle;
-        double distancePerWheel;
-
-        int leftFrontDistance;
-        int leftRearDistance;
-        int rightRearDistance;
-        int rightFrontDistance;
-
-        double leftFrontPower;
-        double leftRearPower;
-        double rightRearPower;
-        double rightFrontPower;
-
-        double leftFrontCos;
-        double leftRearCos;
-        double rightRearCos;
-        double rightFrontCos;
-
-//        x = -x;
-
-        setMotorsMode(STOP_AND_RESET_ENCODER);
-
-        try {
-            relativeAngle = Math.toDegrees(Math.atan(y / x));
-        } catch (ArithmeticException e) {
-            if (y > 0) relativeAngle = 90;
-            else relativeAngle = 270;
-        }
-
-        distancePerWheel = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
-
-        leftFrontCos = Math.cos(Math.toRadians(ANGLE_LEFT_FRONT - relativeAngle));
-        leftRearCos = Math.cos(Math.toRadians(ANGLE_LEFT_REAR - relativeAngle));
-        rightRearCos = Math.cos(Math.toRadians(ANGLE_RIGHT_REAR - relativeAngle));
-        rightFrontCos = Math.cos(Math.toRadians(ANGLE_RIGHT_FRONT - relativeAngle));
-
-        leftFrontDistance = (int) (distancePerWheel * leftFrontCos);
-        leftRearDistance = (int) (distancePerWheel * leftRearCos);
-        rightRearDistance = (int) (distancePerWheel * rightRearCos);
-        rightFrontDistance = (int) (distancePerWheel * rightFrontCos);
-
-        leftFrontPower = power * leftFrontCos;
-        leftRearPower = power * leftRearCos;
-        rightRearPower = power * rightRearCos;
-        rightFrontPower = power * rightFrontCos;
-
-
-        frontLeftMotor.setTargetPosition((int) (leftFrontDistance * TICKS_PER_INCH));
-        backLeftMotor.setTargetPosition((int) (leftRearDistance * TICKS_PER_INCH));
-        backRightMotor.setTargetPosition((int) (rightRearDistance * TICKS_PER_INCH));
-        frontRightMotor.setTargetPosition((int) (rightFrontDistance * TICKS_PER_INCH));
-
-        frontLeftMotor.setPower(leftFrontPower);
-        backLeftMotor.setPower(leftRearPower);
-        backRightMotor.setPower(rightRearPower);
-        frontRightMotor.setPower(rightFrontPower);
-
-        setMotorsMode(RUN_TO_POSITION);
+    public void runWithoutEncoderPrime(double xPrime, double yPrime, double z) {
+        setMotorsMode(RUN_WITHOUT_ENCODER);
+        frontLeftMotor.setPower(xPrime + z);
+        backLeftMotor.setPower(yPrime + z);
+        backRightMotor.setPower(-xPrime + z);
+        frontRightMotor.setPower(-yPrime + z);
     }
+
 
     public void runUsingEncoder(double xTarget, double yTarget, double inputPower) {
         double r;

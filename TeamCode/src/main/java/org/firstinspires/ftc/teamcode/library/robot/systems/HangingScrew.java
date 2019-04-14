@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.library.robot.systems;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-public class LiftingScrew implements Stoppable {
+public class HangingScrew implements Stoppable {
     final private DcMotor screw;
 //    private Thread waitThread = new Thread(new Runnable() {
 //        @Override
@@ -22,7 +22,7 @@ public class LiftingScrew implements Stoppable {
 //
 //        }
 //    });
-    public LiftingScrew(DcMotor screw) {
+    public HangingScrew(DcMotor screw) {
         this.screw = screw;
         ((DcMotorEx) screw).setTargetPositionTolerance(100);
     }
@@ -50,10 +50,9 @@ public class LiftingScrew implements Stoppable {
     }
 
     public void manualControl(double power) {
-            if (power != 0) {
-                this.screw.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                this.screw.setPower(power);
-            }
+        this.screw.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        this.screw.setPower(power);
+
     }
 
     @Override

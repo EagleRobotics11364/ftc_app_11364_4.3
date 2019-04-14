@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.testopmodes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -7,7 +8,7 @@ import com.qualcomm.robotcore.robot.Robot;
 
 import org.firstinspires.ftc.teamcode.library.robot.BaseRobot;
 @TeleOp(name="Encoder View OpMode", group="Test")
-
+@Disabled
 public class EncoderViewOpMode extends OpMode {
     BaseRobot robot;
 

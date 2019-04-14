@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.testopmodes;
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -9,7 +10,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcontroller.external.samples.SensorREVColorDistance;
 
 @TeleOp(name = "Color Sensor Test", group = "Test")
-//@Disabled
+@Disabled
 public class ColorSensorTest extends OpMode {
 
     private ElapsedTime runtime = new ElapsedTime();

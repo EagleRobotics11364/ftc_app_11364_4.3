@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode.library.robot.systems;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.library.robot.systems.rgb.RGBColor1Pattern;
+
 public abstract class Drivetrain implements Stoppable {
     DcMotor frontLeftMotor;
     DcMotor frontRightMotor;

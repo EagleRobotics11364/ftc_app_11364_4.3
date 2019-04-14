@@ -36,30 +36,24 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.library.functions.MathOperations;
+import org.firstinspires.ftc.teamcode.library.robot.BaseRobot;
 
 /**
  * Demonstrates empty OpMode
  */
-@TeleOp(name = "Holonomic Simple Test OpMode", group = "Test")
-@Disabled
-public class HolonomicSimpleOpMode extends OpMode {
+@TeleOp(name = "Holonomic Driving Test OpMode", group = "Test")
+//@Disabled
+public class ConfirmCorrectDriving extends OpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
-
-    DcMotor frontLeftMotor;
-    DcMotor backLeftMotor;
-    DcMotor frontRightMotor;
-    DcMotor backRightMotor;
+BaseRobot robot;
 
     @Override
     public void init() {
         telemetry.addData("Status", "Initialized");
 
         // Get motors from map
-        frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
-        backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
-        frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
-        backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
+        robot = new BaseRobot(hardwareMap);
 
     }
 
@@ -78,6 +72,8 @@ public class HolonomicSimpleOpMode extends OpMode {
     @Override
     public void start() {
         runtime.reset();
+        robot.holonomic.runUsingEncoder(10, 20, 1);
+        while(robot.holonomic.motorsAreBusy());
     }
 
     /*
@@ -88,19 +84,7 @@ public class HolonomicSimpleOpMode extends OpMode {
     public void loop(){
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         // Run using cubic and Y reversed
-        float x = gamepad1.left_stick_x;
-        x = MathOperations.rangeClip(x, -1, 1);
-        float y = gamepad1.left_stick_y;
-        y = -MathOperations.rangeClip(y, -1, 1);
-        float z = gamepad1.right_stick_x;
-        z = MathOperations.rangeClip(z, -1, 1);
-        frontLeftMotor.setPower(x - y + z);
-        frontRightMotor.setPower(x + y + z);
-        backLeftMotor.setPower(-x + y + z);
-        backRightMotor.setPower(-x - y + z);
-        telemetry.addData("x", x);
-        telemetry.addData("y", y);
-        telemetry.addData("z", z);
+
 
     }
 

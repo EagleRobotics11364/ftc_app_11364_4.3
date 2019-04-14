@@ -98,7 +98,7 @@ import java.util.Locale;
  * @see <a href="https://www.bosch-sensortec.com/bst/products/all_products/bno055">BNO055 product page</a>
  * @see <a href="https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST_BNO055_DS000_14.pdf">BNO055 specification</a>
  */
-@TeleOp(name = "Sensor: BNO055 IMU Calibration", group = "Sensor")
+@TeleOp(name = "Sensor: BNO055 IMU Calibration", group = "IMU")
 //@Disabled                            // Uncomment this to add to the opmode list
 public class IMUCalibrationOpMode extends LinearOpMode
     {
@@ -129,7 +129,7 @@ public class IMUCalibrationOpMode extends LinearOpMode
         telemetry.log().add("calibration data to a file.");
         telemetry.log().add("");
 
-        // We are expecting the IMU to be attached to an I2C port on a Core Device Interface Module and named "imu".
+        // We are expecting the IMU to be attached to an I2C port on a Core Device Interface Module and named "imuA".
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.loggingEnabled = true;
         parameters.loggingTag     = "IMU";
@@ -181,7 +181,7 @@ public class IMUCalibrationOpMode extends LinearOpMode
         // from the IMU that we will then display in separate lines.
         telemetry.addAction(new Runnable() { @Override public void run()
                 {
-                // Acquiring the angles is relatively expensive; we don't want
+                // Acquiring the anglesA is relatively expensive; we don't want
                 // to do that in each of the three items that need that info, as that's
                 // three times the necessary expense.
                 angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);

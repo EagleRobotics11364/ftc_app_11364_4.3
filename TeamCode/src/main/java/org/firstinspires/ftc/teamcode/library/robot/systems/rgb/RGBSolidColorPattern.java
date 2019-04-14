@@ -1,0 +1,31 @@
+package org.firstinspires.ftc.teamcode.library.robot.systems.rgb;
+
+public enum RGBSolidColorPattern implements IndexableRGBPattern {
+    SOLIDCOLORS_HOT_PINK,
+    SOLIDCOLORS_DARK_RED,
+    SOLIDCOLORS_RED,
+    SOLIDCOLORS_RED_ORANGE,
+    SOLIDCOLORS_ORANGE,
+    SOLIDCOLORS_GOLD,
+    SOLIDCOLORS_YELLOW,
+    SOLIDCOLORS_LAWN_GREEN,
+    SOLIDCOLORS_LIME,
+    SOLIDCOLORS_DARK_GREEN,
+    SOLIDCOLORS_GREEN,
+    SOLIDCOLORS_BLUE_GREEN,
+    SOLIDCOLORS_AQUA,
+    SOLIDCOLORS_SKY_BLUE,
+    SOLIDCOLORS_DARK_BLUE,
+    SOLIDCOLORS_BLUE,
+    SOLIDCOLORS_BLUE_VIOLET,
+    SOLIDCOLORS_VIOLET,
+    SOLIDCOLORS_WHITE,
+    SOLIDCOLORS_GRAY,
+    SOLIDCOLORS_DARK_GRAY,
+    SOLIDCOLORS_BLACK;
+
+    @Override
+    public int getServoInput() {
+        return 1785 + ordinal() * 10;
+    }
+}

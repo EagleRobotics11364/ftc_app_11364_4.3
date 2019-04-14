@@ -50,6 +50,8 @@ public class ServoTest extends OpMode {
     @Override
     public void init() {
         telemetry.addData("Status", "Initialized");
+        telemetry.addLine("Connect a servo to the port");
+        telemetry.addLine("designated for teamMarkerServo");
 
         // Get motors from map
         servo = hardwareMap.servo.get("teamMarkerServo");
@@ -80,9 +82,9 @@ public class ServoTest extends OpMode {
     @Override
     public void loop(){
 
-            float y = gamepad1.left_trigger;
-            servo.setPosition(Math.abs(y));
-            telemetry.addData("y",y);
+            float position = gamepad1.left_trigger;
+            servo.setPosition(Math.abs(position));
+            telemetry.addData("y",position);
 
 
     }

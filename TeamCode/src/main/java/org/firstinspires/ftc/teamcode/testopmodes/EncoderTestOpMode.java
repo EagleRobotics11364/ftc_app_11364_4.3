@@ -1,12 +1,13 @@
-package org.firstinspires.ftc.teamcode.opmodes;
+package org.firstinspires.ftc.teamcode.testopmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.library.robot.BaseRobot;
 
 @Autonomous(name="Encoder Test OpMode", group = "Test")
-//@Disabled
+@Disabled
 public class EncoderTestOpMode extends LinearOpMode {
     BaseRobot robot;
 

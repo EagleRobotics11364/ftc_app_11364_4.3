@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode.testopmodes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -42,7 +43,7 @@ import org.firstinspires.ftc.teamcode.library.robot.systems.Holonomic;
  * Demonstrates empty OpMode
  */
 @TeleOp(name = "Holonomic Test OpMode", group = "Test")
-//@Disabled
+@Disabled
 public class HolonomicTestOpMode extends OpMode {
 
     private ElapsedTime runtime = new ElapsedTime();

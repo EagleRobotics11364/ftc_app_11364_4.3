@@ -73,7 +73,7 @@ public class IterableTelemetryMenu {
 
     public void nextItem() {
         if (!allMenuItems.isEmpty()) {
-            if (position < allMenuItems.size()) {
+            if (position < allMenuItems.size()-1) {
                 position++;
             }
         }

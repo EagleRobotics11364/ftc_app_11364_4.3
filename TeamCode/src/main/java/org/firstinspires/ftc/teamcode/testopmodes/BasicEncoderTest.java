@@ -30,6 +30,7 @@
 package org.firstinspires.ftc.teamcode.testopmodes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -40,7 +41,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Demonstrates empty OpMode
  */
 @Autonomous(name = "Basic Encoder Test", group = "Test")
-//@Disabled
+@Disabled
 public class BasicEncoderTest extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
