@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.library.functions.MusicPlayer
 import org.firstinspires.ftc.teamcode.library.functions.truncate
 import org.firstinspires.ftc.teamcode.library.robot.BaseRobot
 
-@TeleOp(name = "World TeleOp", group = "World")
+@TeleOp(name = "World TeleOp", group = "OpModes")
 open class WorldTeleop : OpMode() {
     lateinit var robot: BaseRobot
     lateinit var musicPlayer: MusicPlayer

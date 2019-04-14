@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.library.sampling.SamplingMethod;
 import org.firstinspires.ftc.teamcode.library.sampling.TensorFlowSampler;
 
 
-@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "World Autonomous", group = "World")
+@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "World Autonomous", group = "OpModes")
 public class WorldAutonomous extends LinearOpMode {
 
     // robot, core systems variables

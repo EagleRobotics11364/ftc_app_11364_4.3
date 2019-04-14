@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -8,6 +9,7 @@ import org.firstinspires.ftc.teamcode.library.robot.BaseRobot;
 import static org.firstinspires.ftc.teamcode.library.functions.MathOperations.rangeBuffer;
 import static org.firstinspires.ftc.teamcode.library.functions.MathOperations.rangeClip;
 @TeleOp(name="State TeleOp", group="LT")
+@Disabled
 public class WorldTeleopJava extends OpMode {
     public BaseRobot robot;
 
