@@ -17,6 +17,7 @@ open class WorldTeleop : OpMode() {
     var currentLEDPattern = RevBlinkinLedDriver.BlinkinPattern.BLACK
     var slow = false
     var reverse = false
+    var hookIsFront = false
     var gamepad1StickButtonPressed = false
     var doConstantPower = true
     var musicDiscovered = false
@@ -55,10 +56,13 @@ open class WorldTeleop : OpMode() {
 
     open fun controlDrivetrain() {
 
-        val x = -gamepad1.left_stick_y.toDouble().rangeClipAndBuffer().processSpeed().processDirection()
-        val y = -gamepad1.left_stick_x.toDouble().rangeClipAndBuffer().processSpeed().processDirection()
+        val x = -gamepad1.left_stick_y.toDouble().rangeClipAndBuffer().processSpeed()
+        val y = -gamepad1.left_stick_x.toDouble().rangeClipAndBuffer().processSpeed()
         val z = gamepad1.right_stick_x.toDouble().rangeClipAndBuffer().processSpeed()
-        robot.holonomic.runWithoutEncoder(x, y, z)
+        if (hookIsFront) robot.holonomic.runWithoutEncoder(y, -x, z)
+            else if (reverse) robot.holonomic.runWithoutEncoder(-x, -y, z)
+            else robot.holonomic.runWithoutEncoder(x, y, z)
+
 
 //        val directions = doubleArrayOf((-gamepad1.left_stick_y).toDouble(), (-gamepad1.left_stick_x).toDouble(), gamepad1.right_stick_x.toDouble())
 //        for (i in directions.indices) {
@@ -68,9 +72,15 @@ open class WorldTeleop : OpMode() {
 //        }
 //        robot.holonomic.runWithoutEncoder((if (reverse) -1 else 1) * directions[0], (if (reverse) -1 else 1) * directions[1], directions[2])
 
-        if (gamepad1.a)
+        if (gamepad1.a) {
             reverse = false
-        else if (gamepad1.b) reverse = true
+            hookIsFront = false
+        }
+        else if (gamepad1.b) {
+            reverse = true
+            hookIsFront = false
+        }
+        else if (gamepad1.dpad_left) hookIsFront = true
         telemetry.addData("Driving Mode", if (reverse) "Reverse" else "Normal")
     }
 

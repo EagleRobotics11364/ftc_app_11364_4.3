@@ -160,10 +160,10 @@ public class WorldAutonomous extends LinearOpMode {
 
         switch (startingPosition) {
             case LEFT:                      // START LEFT POSITION
-                strafeUsingEncoder(0,9,0.6);
+                strafeUsingEncoder(0,9,1);
                 setLEDPattern(RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_RAINBOW_PALETTE);
                 if (dropTeamMarker) {       // start left position -> DROP TEAM MARKER
-                    strafeUsingEncoder(0,-10,0.6);
+                    strafeUsingEncoder(0,-10,1);
                     int baselineStrafe = -35;
                     switch (goldSamplePosition) {
                         case LEFT:          // start left position -> drop team marker -> LEFT SAMPLE POSITION
@@ -181,8 +181,8 @@ public class WorldAutonomous extends LinearOpMode {
                     }
                     turnUsingEncoder(-45,0.8);
                     drive(0,1,0,750);
-                    sleep(500);
-                    strafeUsingEncoder(0,-3.0, 0.8 );
+                    sleep(250);
+                    strafeUsingEncoder(0,-3.0, 1 );
                     switch (goldSamplePosition) {
                         case LEFT: case CENTER:
                             strafeUsingEncoder(-48,0,1);
@@ -192,12 +192,12 @@ public class WorldAutonomous extends LinearOpMode {
                     }
 
                     strafeUsingEncoder(0,-3,0.8);
-                    sleep(500);
+                    sleep(250);
                     robot.teamMarkerServo.setPosition(BaseRobot.TEAM_MARKER_RELEASED);
 //                    turnUsingEncoder(-30,0.6);
 //                    sleep(200);
 //                    turnUsingEncoder(30,0.6);
-                    sleep(400);
+                    sleep(300);
                     strafeUsingEncoder(50,4,1);
                     drive(0,1,0,500);
                     sleep(200);
@@ -365,7 +365,7 @@ public class WorldAutonomous extends LinearOpMode {
 
     private void doTensorFlowDualSampling() {
         setLEDPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
-        sleep(400);
+        sleep(300);
         for (int i = 0; i<5 && goldSamplePosition==Position.NULL; i++) {
             goldSamplePosition = tensorFlowSampler.recognizeGoldUsingTwoMinerals(Position.LEFT);
             sleep(100);
@@ -395,7 +395,7 @@ public class WorldAutonomous extends LinearOpMode {
                 println("Driving forward for Pass 2...");
                 strafeUsingEncoder(-1.5, 8, 1);
                 setLEDPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
-                sleep(400);
+                sleep(300);
                 for (int i = 0; i<5 && goldSamplePosition==Position.NULL; i++) {
                     goldSamplePosition = tensorFlowSampler.recognizeGoldUsingTwoMinerals(Position.LEFT);
                     sleep(100);
@@ -415,7 +415,7 @@ public class WorldAutonomous extends LinearOpMode {
                     case RIGHT:
                         setLEDPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_BLUE);
                         println("Driving right after Pass 2 reading");
-                        strafeUsingEncoder(29, FWDISTANCE-8, 0.7);
+                        strafeUsingEncoder(29, FWDISTANCE-8, 1);
                         break;
                     case NULL:
                         setLEDPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_RED);
@@ -448,7 +448,7 @@ public class WorldAutonomous extends LinearOpMode {
         MenuItemBoolean i_land = new MenuItemBoolean("land", "Deploy from Lander", true);
         MenuItemBoolean i_useIMU = new MenuItemBoolean("useIMU","Enable IMU",false);
         MenuItemBoolean i_useLEDs = new MenuItemBoolean("useLEDs","Enable LEDs",true);
-        MenuItemBoolean i_useMusic = new MenuItemBoolean("useMusic","Enable Music",true);
+        MenuItemBoolean i_useMusic = new MenuItemBoolean("useMusic","Enable Music",false);
         menu.add(i_startingPosition, i_samplingMethod, i_startDelay, i_parkInCrater, i_dropTeamMarker, i_land, i_useIMU, i_useLEDs, i_useMusic);
 
         while (!isStarted()&&!isStopRequested()) {
