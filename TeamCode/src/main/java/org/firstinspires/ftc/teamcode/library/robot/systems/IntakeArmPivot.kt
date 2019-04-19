@@ -40,6 +40,7 @@ class IntakeArmPivot(private val motor: DcMotor,
                             input > 0.03 -> {
                                 when {
                                     fullProportion > 0.90 -> 0.0
+                                    fullProportion in 0.00..0.30 -> input
                                     else -> input * 0.5
                                 }
                             }
@@ -50,7 +51,7 @@ class IntakeArmPivot(private val motor: DcMotor,
                                 }
                             }
                             else -> when {
-                                fullProportion in 0.20..0.65 -> 0.20
+                                fullProportion in 0.20..0.65 -> 0.0
                                 else -> 0.00
 
                             }

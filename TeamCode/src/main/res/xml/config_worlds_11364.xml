@@ -4,6 +4,7 @@
         <LynxModule name="Expansion Hub 1" port="1">
             <!--motors-->
             <Matrix12vMotor name="hangingScrew" port="0" />
+            <RevRoboticsCoreHexMotor name="collectorMotor" port="1"/>
             <RevRoboticsCoreHexMotor name="backLeftMotor" port="2" />
             <RevRoboticsCoreHexMotor name="frontLeftMotor" port="3" />
             <!--analog input devices-->
@@ -20,7 +21,7 @@
             <!--servos-->
             <Servo name="collectionBoxPivotServo" port="0" />
             <Servo name="outputDirectionSwitcherServo" port="1" />
-            <Servo name="collectorServo" port="2" />
+            <!--<Servo name="collectorServo" port="2" />-->
             <RevBlinkinLedDriver name="blinkin" port="3"/>
             <Servo name="teamMarkerServo" port="5" />
             <!--i2c bus 0-->

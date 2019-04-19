@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -19,8 +20,9 @@ import org.firstinspires.ftc.teamcode.library.sampling.SamplingMethod;
 import org.firstinspires.ftc.teamcode.library.sampling.TensorFlowSampler;
 
 
-@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "World Autonomous", group = "OpModes")
-public class WorldAutonomous extends LinearOpMode {
+@Autonomous(name = "World Autonomous TFOD during Init", group = "OpModes")
+@Disabled
+public class WorldAutonomousTFOD extends LinearOpMode {
 
     // robot, core systems variables
     private BaseRobot robot;
@@ -29,7 +31,7 @@ public class WorldAutonomous extends LinearOpMode {
 
     // action variables
     private Position startingPosition = Position.NULL;
-    private SamplingMethod samplingMethod = SamplingMethod.COLORSENSORS;
+    private SamplingMethod samplingMethod = SamplingMethod.TFOD_TRIPLE;
     private boolean parkInCrater = false;
     private boolean dropTeamMarker = false;
     private boolean land = true;
@@ -58,19 +60,7 @@ public class WorldAutonomous extends LinearOpMode {
             reportIMUData();
         }
         if (useMusic) musicPlayer.play();
-        switch (samplingMethod) {
-            case TFOD_TRIPLE: case TFOD_DUAL: case TFOD_SINGLE:
-            try {
-                telemetry.addData("Vuforia", "Ready");
-                tensorFlowSampler = TensorFlowSampler.Factory.newSampler(hardwareMap);
-                tensorFlowSampler.activate();
-            } catch (TensorFlowSampler.UnsupportedHardwareException e) {
-                samplingMethod = SamplingMethod.COLORSENSORS;
-                telemetry.addData("Vuforia", "Invalid Hardware!!!");
-            }
-            telemetry.update();
-            break;
-        }
+
 
         if (samplingMethod == SamplingMethod.TFOD_TRIPLE) {
             for (int i = 0; i<5 & goldSamplePosition == Position.NULL; i++) {
@@ -209,15 +199,14 @@ public class WorldAutonomous extends LinearOpMode {
                         case RIGHT:
                             break;
                     }
-                    while (robot.intakeArmPivotController.getFullProportion() > 0.20 & opModeIsActive()) {
+                    while (robot.intakeArmPivotController.getFullProportion() > 0.10 & opModeIsActive()) {
                         robot.intakeArmPivotController.controlFromGamepadInput(-1, false);
 
                     }
-                    robot.intakeArmPivotController.controlFromGamepadInput(0, false);
 
 
                 } else if (parkInCrater) { // start left position -> PARK IN CRATER
-//                    strafeUsingEncoder(0,10,0.65);
+                    strafeUsingEncoder(0,10,0.65);
                 }
                 break;
             case RIGHT:                     // START RIGHT POSITION
@@ -260,13 +249,9 @@ public class WorldAutonomous extends LinearOpMode {
                             case LEFT:      // start right position -> drop team marker -> any sample position -> park in crater -> LEFT SAMPLE POSITION
 //                                strafeUsingEncoder(10,-10,0.8);
                                 strafeUsingEncoder(0,-40,1);
-                                turnUsingEncoder(90, 1);
-                                drive(0, -1, 0, 1000);
-                                strafeUsingEncoder(20, -3, 1);
                                 break;
                             case CENTER:// start right position -> drop team marker -> any sample position -> park in crater -> CENTER SAMPLE POSITION
                                 strafeUsingEncoder(30,0,1);
-                                drive(0, -1, 0, 1000);
                                 break;
                             case RIGHT:     // start right position -> drop team marker -> any sample position -> park in crater -> RIGHT SAMPLE POSITION
                                 turnUsingEncoder(90,1 );
@@ -278,14 +263,14 @@ public class WorldAutonomous extends LinearOpMode {
                         }
                     if (parkInCrater) {
                         while (robot.intakeArmPivotController.getFullProportion() > 0.10 & opModeIsActive()) {
-                            robot.intakeArmPivotController.controlFromGamepadInput(-1, false);
+                            robot.intakeArmPivotController.controlFromGamepadInput(-0.5, false);
                         }
                     }
                 }
                 break;
         }
         sleep(500);
-
+       reportIMUData();
 
         /*
 
@@ -384,7 +369,7 @@ public class WorldAutonomous extends LinearOpMode {
             case LEFT:
                 setLEDPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_BLUE);
                 println("Driving left after Pass 1 reading");
-                strafeUsingEncoder(-11,FWDISTANCE, 1);
+                strafeUsingEncoder(-9,FWDISTANCE, 1);
                 break;
             case CENTER:
                 setLEDPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_BLUE);
@@ -394,7 +379,7 @@ public class WorldAutonomous extends LinearOpMode {
             case RIGHT:
                 setLEDPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_BLUE);
                 println("Driving right after Pass 1 reading");
-                strafeUsingEncoder(16, FWDISTANCE, 0.7);
+                strafeUsingEncoder(15, FWDISTANCE, 0.7);
                 break;
             case NULL:
                 setLEDPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_RED);
@@ -411,7 +396,7 @@ public class WorldAutonomous extends LinearOpMode {
                     case LEFT:
                         setLEDPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_BLUE);
                         println("Driving left after Pass 2 reading");
-                        strafeUsingEncoder(-6.5,FWDISTANCE-8, 1);
+                        strafeUsingEncoder(-4,FWDISTANCE-8, 1);
                         break;
                     case CENTER:
                         setLEDPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_BLUE);
@@ -421,7 +406,7 @@ public class WorldAutonomous extends LinearOpMode {
                     case RIGHT:
                         setLEDPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_BLUE);
                         println("Driving right after Pass 2 reading");
-                        strafeUsingEncoder(27, FWDISTANCE-8, 1);
+                        strafeUsingEncoder(29, FWDISTANCE-8, 1);
                         break;
                     case NULL:
                         setLEDPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_RED);
@@ -445,9 +430,11 @@ public class WorldAutonomous extends LinearOpMode {
     }
 
     private void runPreMatchTelemetryMenu() {
+        try {
+            tensorFlowSampler = TensorFlowSampler.Factory.newSampler(hardwareMap);
+        } catch (TensorFlowSampler.UnsupportedHardwareException e) {samplingMethod = SamplingMethod.COLORSENSORS;}
         menu = new IterableTelemetryMenu(telemetry);
         MenuItemEnum<Position> i_startingPosition = new MenuItemEnum<Position>("startingPosition", "Starting Position", Position.LEFT, Position.RIGHT);
-        MenuItemEnum<SamplingMethod> i_samplingMethod = new MenuItemEnum<SamplingMethod>("samplingMethod", "Sampling Method", SamplingMethod.TFOD_TRIPLE, SamplingMethod.TFOD_DUAL, SamplingMethod.TFOD_SINGLE, SamplingMethod.COLORSENSORS, SamplingMethod.ALWAYS_CENTER);
         MenuItemInteger i_startDelay = new MenuItemInteger("startDelay", "Delay Before Sampling", 0, 0, 15);
         MenuItemBoolean i_parkInCrater = new MenuItemBoolean("craterPark", "Park in Crater", true);
         MenuItemBoolean i_dropTeamMarker = new MenuItemBoolean("marker", "Drop Team Marker", true);
@@ -455,7 +442,7 @@ public class WorldAutonomous extends LinearOpMode {
         MenuItemBoolean i_useIMU = new MenuItemBoolean("useIMU","Enable IMU",false);
         MenuItemBoolean i_useLEDs = new MenuItemBoolean("useLEDs","Enable LEDs",true);
         MenuItemBoolean i_useMusic = new MenuItemBoolean("useMusic","Enable Music",false);
-        menu.add(i_startingPosition, i_samplingMethod, i_startDelay, i_parkInCrater, i_dropTeamMarker, i_land, i_useIMU, i_useLEDs, i_useMusic);
+        menu.add(i_startingPosition, i_startDelay, i_parkInCrater, i_dropTeamMarker, i_land, i_useIMU, i_useLEDs, i_useMusic);
 
         while (!isStarted()&&!isStopRequested()) {
             if (gamepad1.dpad_up) {
@@ -471,10 +458,12 @@ public class WorldAutonomous extends LinearOpMode {
                 menu.iterateForward();
                 while (gamepad1.dpad_right) ;
             }
+            Position temp = tensorFlowSampler.recognizeGoldUsingThreeMinerals();
+//            if (temp != Position.NULL)
         }
         if (isStopRequested()) return;
         startingPosition = i_startingPosition.getValue();
-        samplingMethod = i_samplingMethod.getValue();
+
         parkInCrater = i_parkInCrater.getValue();
         dropTeamMarker = i_dropTeamMarker.getValue();
         secondsDelay = i_startDelay.getValue();

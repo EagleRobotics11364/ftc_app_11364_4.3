@@ -50,10 +50,10 @@ public class BaseRobot {
 
     // Intake Variables (Section 5)
     private DcMotor intakeArmPivotMotor;
+    public DcMotor collectorMotor;
     public DcMotor intakeArmExtensionMotor;
     public Servo collectionBoxPivotServo;
     public Servo outputDirectionSwitcherServo;
-    public Servo collectorServo;
 
     // IMU Variables (Section 6)
     public BNO055IMU imuA;
@@ -94,7 +94,7 @@ public class BaseRobot {
         intakeArmExtensionMotor = hardwareMap.dcMotor.get("intakeArmExtensionMotor");
         collectionBoxPivotServo = hardwareMap.servo.get("collectionBoxPivotServo");
         outputDirectionSwitcherServo = hardwareMap.servo.get("outputDirectionSwitcherServo");
-        collectorServo = hardwareMap.servo.get("collectorServo");
+        collectorMotor = hardwareMap.dcMotor.get("collectorMotor");
 
         // IMU Variables (Section 6)
         imuA = hardwareMap.get(BNO055IMU.class, "imuA");

@@ -60,8 +60,8 @@ open class WorldTeleop : OpMode() {
         val y = -gamepad1.left_stick_x.toDouble().rangeClipAndBuffer().processSpeed()
         val z = gamepad1.right_stick_x.toDouble().rangeClipAndBuffer().processSpeed()
         if (hookIsFront) robot.holonomic.runWithoutEncoder(y, -x, z)
-            else if (reverse) robot.holonomic.runWithoutEncoder(-x, -y, z)
-            else robot.holonomic.runWithoutEncoder(x, y, z)
+        else if (reverse) robot.holonomic.runWithoutEncoder(-x, -y, z)
+        else robot.holonomic.runWithoutEncoder(x, y, z)
 
 
 //        val directions = doubleArrayOf((-gamepad1.left_stick_y).toDouble(), (-gamepad1.left_stick_x).toDouble(), gamepad1.right_stick_x.toDouble())
@@ -75,12 +75,10 @@ open class WorldTeleop : OpMode() {
         if (gamepad1.a) {
             reverse = false
             hookIsFront = false
-        }
-        else if (gamepad1.b) {
+        } else if (gamepad1.b) {
             reverse = true
             hookIsFront = false
-        }
-        else if (gamepad1.dpad_left) hookIsFront = true
+        } else if (gamepad1.dpad_left) hookIsFront = true
         telemetry.addData("Driving Mode", if (reverse) "Reverse" else "Normal")
     }
 
@@ -92,20 +90,21 @@ open class WorldTeleop : OpMode() {
             // disable intake motors
             robot.intakeArmExtensionMotor.power = 0.0
             robot.intakeArmPivotController.stop()
-            robot.collectorServo.position = 0.5
+            robot.collectorMotor.power = 0.0
+            when {
+                gamepad2.dpad_up -> doConstantPower = true
+                gamepad2.dpad_down -> doConstantPower = false
+            }
 
-        } else
-        // stop hanging screw
+        } else {
+            // stop hanging screw
             robot.hangingScrew.stop()
 
-        // intake arm raise/lower (with auto override)
-        robot.intakeArmPivotController.controlFromGamepadInput((gamepad2.left_stick_y).toDouble(), gamepad2.left_bumper)
+            // intake arm raise/lower (with auto override)
+            robot.intakeArmPivotController.controlFromGamepadInput((gamepad2.left_stick_y).toDouble(), gamepad2.left_bumper)
 
-        // intake arm extend/retract
-        if (gamepad2.right_bumper) when {
-            gamepad2.dpad_up -> doConstantPower = true
-            gamepad2.dpad_down -> doConstantPower = false
-        }
+            // intake arm extend/retract
+
 //        when (doConstantPower) {
 //            true  -> {
 //                if (robot.intakeArmPivotController.fullProportion >= 0.55 )robot.intakeArmExtensionMotor.power = 0.25 - (-gamepad2.right_stick_y) * 0.20
@@ -113,62 +112,63 @@ open class WorldTeleop : OpMode() {
 //            }
 //            false -> robot.intakeArmExtensionMotor.power = (-gamepad2.right_stick_y).toDouble()
 //        }
-        if (!(gamepad2.right_stick_y in -0.03..0.03)) {
-            robot.intakeArmExtensionMotor.power = -gamepad2.right_stick_y.toDouble()
-        } else {
-            robot.intakeArmExtensionMotor.power = when (doConstantPower) {
-                true -> if (robot.intakeArmPivotController.fullProportion < 0.5) 0.00 else 0.20
-                false -> 0.0
-            }
-        }
-        // mineral box pivot
-        if (gamepad2.a)
-            robot.collectionBoxPivotServo.position = BaseRobot.INTAKE_BOX_POSITION_HOLDING
-        else if (gamepad2.b)
-            robot.collectionBoxPivotServo.position = BaseRobot.INTAKE_BOX_POSITION_COLLECTION_OR_DEPOSIT
-        else if (gamepad2.left_stick_button) {
-            robot.collectionBoxPivotServo.position =
-                    when {
-                        robot.intakeArmPivotController.fullProportion in 0.6..2.0 ->
-                            BaseRobot.INTAKE_BOX_POSITION_COLLECTION_OR_DEPOSIT
-                        else ->
-                            BaseRobot.INTAKE_BOX_POSITION_HOLDING
-                    }
-        }
-
-        // change output direction
-        if (gamepad2.dpad_left)
-            robot.outputDirectionSwitcherServo.position = BaseRobot.INTAKE_SILVER_OUTPUT_LEFT
-        else if (gamepad2.dpad_right) robot.outputDirectionSwitcherServo.position = BaseRobot.INTAKE_SILVER_OUTPUT_RIGHT
-        else if (gamepad2.dpad_down) robot.outputDirectionSwitcherServo.position = BaseRobot.INTAKE_SILVER_OUTPUT_CENTER
-
-        // mineral collector speed
-        robot.collectorServo.position =
-                when {
-                    gamepad2.right_trigger > 0.03 ->
-                        0.50 + (gamepad2.right_trigger * 0.50)
-                    gamepad2.left_trigger > 0.03 ->
-                        0.50 - (gamepad2.left_trigger * 0.5)
-                    gamepad1.right_trigger > 0.03 ->
-                        0.50 + (gamepad1.right_trigger * 0.50)
-                    gamepad1.left_trigger > 0.03 ->
-                        0.50 - (gamepad1.left_trigger * 0.5)
-                    else ->
-                        0.50
+            if (!(gamepad2.right_stick_y in -0.03..0.03)) {
+                robot.intakeArmExtensionMotor.power = -gamepad2.right_stick_y.toDouble()
+            } else {
+                robot.intakeArmExtensionMotor.power = when (doConstantPower) {
+                    true -> if (robot.intakeArmPivotController.fullProportion < 0.5) 0.00 else 0.20
+                    false -> 0.0
                 }
+            }
+            // mineral box pivot
+            if (gamepad2.a)
+                robot.collectionBoxPivotServo.position = BaseRobot.INTAKE_BOX_POSITION_HOLDING
+            else if (gamepad2.b)
+                robot.collectionBoxPivotServo.position = BaseRobot.INTAKE_BOX_POSITION_COLLECTION_OR_DEPOSIT
+            else if (gamepad2.left_stick_button) {
+                robot.collectionBoxPivotServo.position =
+                        when {
+                            robot.intakeArmPivotController.fullProportion in 0.6..2.0 ->
+                                BaseRobot.INTAKE_BOX_POSITION_COLLECTION_OR_DEPOSIT
+                            else ->
+                                BaseRobot.INTAKE_BOX_POSITION_HOLDING
+                        }
+            }
 
-        // yeet the team marker
-        if (gamepad2.y)
-            robot.teamMarkerServo.position = BaseRobot.TEAM_MARKER_RELEASED // y is for yeet
-        else if (gamepad2.x) robot.teamMarkerServo.position = BaseRobot.TEAM_MARKER_RETRACTED
+            // change output direction
+            if (gamepad2.dpad_left)
+                robot.outputDirectionSwitcherServo.position = BaseRobot.INTAKE_SILVER_OUTPUT_LEFT
+            else if (gamepad2.dpad_right) robot.outputDirectionSwitcherServo.position = BaseRobot.INTAKE_SILVER_OUTPUT_RIGHT
+            else if (gamepad2.dpad_down) robot.outputDirectionSwitcherServo.position = BaseRobot.INTAKE_SILVER_OUTPUT_CENTER
 
-        telemetry.addLine()
-        telemetry.addLine("--Intake--")
-        telemetry.addLine().addData("Voltage", robot.intakeArmPivotController.currentVoltage.truncate(2)).addData("Motor Power", robot.intakeArmPivotController.currentMotorPower.truncate(2))
-        telemetry.addLine().addData("Lower %", robot.intakeArmPivotController.lowerProportion.truncate(2)).addData("Upper %", robot.intakeArmPivotController.upperProportion.truncate(2))
-        telemetry.addLine().addData("Full %", robot.intakeArmPivotController.fullProportion.truncate(2))
-        telemetry.addLine().addData("Arm Hold", doConstantPower).addData("Not Going Down", robot.intakeArmPivotController.notGoingDown)
-        telemetry.addLine()
+            // mineral collector speed
+            robot.collectorMotor.power =
+                    when {
+                        gamepad2.right_trigger > 0.03 ->
+                            gamepad2.right_trigger.toDouble() * 0.80
+                        gamepad2.left_trigger > 0.03 ->
+                            -gamepad2.left_trigger.toDouble() * 0.80
+                        gamepad1.right_trigger > 0.03 ->
+                            gamepad1.right_trigger.toDouble() * 0.80
+                        gamepad1.left_trigger > 0.03 ->
+                            -gamepad1.left_trigger.toDouble() * 0.80
+                        else ->
+                            0.0
+                    }
+
+            // yeet the team marker
+            if (gamepad2.y)
+                robot.teamMarkerServo.position = BaseRobot.TEAM_MARKER_RELEASED // y is for yeet
+            else if (gamepad2.x) robot.teamMarkerServo.position = BaseRobot.TEAM_MARKER_RETRACTED
+
+            telemetry.addLine()
+            telemetry.addLine("--Intake--")
+            telemetry.addLine().addData("Voltage", robot.intakeArmPivotController.currentVoltage.truncate(2)).addData("Motor Power", robot.intakeArmPivotController.currentMotorPower.truncate(2))
+            telemetry.addLine().addData("Lower %", robot.intakeArmPivotController.lowerProportion.truncate(2)).addData("Upper %", robot.intakeArmPivotController.upperProportion.truncate(2))
+            telemetry.addLine().addData("Full %", robot.intakeArmPivotController.fullProportion.truncate(2))
+            telemetry.addLine().addData("Arm Hold", doConstantPower).addData("Not Going Down", robot.intakeArmPivotController.notGoingDown)
+            telemetry.addLine()
+        }
     }
 
     fun controlMusic() {
@@ -211,7 +211,7 @@ open class WorldTeleop : OpMode() {
         telemetry.addData("LEDs", ledOrder[currentLEDSetting])
     }
 
-    protected fun Double.processSpeed(): Double = if (slow) this / 2 else this
+    protected fun Double.processSpeed(): Double = if (slow) (this / 2) else this
     protected fun Double.processDirection(): Double = if (reverse) -this else this
     protected fun Double.rangeClipAndBuffer(): Double {
         return MathOperations.rangeBuffer(
